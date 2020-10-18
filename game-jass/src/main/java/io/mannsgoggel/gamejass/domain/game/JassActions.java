@@ -1,14 +1,15 @@
-package com.manoggeli.gamejass.domain.game;
+package io.mannsgoggel.gamejass.domain.game;
 
-import com.manoggeli.gamejass.domain.action.Action;
-import com.manoggeli.gamejass.domain.action.InvalidAction;
+import io.mannsgoggel.gamejass.domain.action.Action;
+import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 import org.javatuples.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import static com.manoggeli.gamejass.domain.game.JassActions.ActionType.*;
+import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
 
 public class JassActions {
     public enum ActionType {
@@ -158,15 +159,16 @@ public class JassActions {
         public GameState reduce(GameState state) {
             var card = getPayload();
             var handCards = state.getPlayerByName(getPlayer()).getHandCards();
-            var tableStack = state.getTableStack();
+            var tableStack = state.getTableStackWithoutPlayer();
             var player = state.getPlayerByName(getPlayer());
+            var playerCards = player.getHandCards();
 
-            if (!JassRules.canPlayCard(card, tableStack, handCards)) {
+            if (!state.getGameMode().playableCards(playerCards, tableStack).contains(card)) {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
             }
 
             handCards.remove(card);
-            tableStack.push(Pair.with(getPlayer(), card));
+            state.getTableStack().add(Pair.with(getPlayer(), card));
 
             if (state.isStichFinished()) {
                 state.setCurrentPlayer("game-master");
@@ -191,16 +193,17 @@ public class JassActions {
         @Override
         public GameState reduce(GameState state) {
 
-            var winningCard = JassRules.winningCard(state.getTableStack());
-            var winningTeam = state.getTeamWith(winningCard.getValue0());
+            var winningCard = state.getGameMode().winningCard(state.getTableStackWithoutPlayer());
+            var winningPlayer = state.getPlayerNameForPlayedCard(winningCard);
+            var winningTeam = state.getTeamWith(winningPlayer);
 
             winningTeam.obtainCards(state.getTableStack());
-            state.setTableStack(new Stack<>());
+            state.setTableStack(new ArrayList<>());
 
             if (state.isRoundFinished()) {
                 state.setCurrentPlayer("game-master");
             } else {
-                state.setCurrentPlayer(winningCard.getValue0());
+                state.setCurrentPlayer(winningPlayer);
             }
 
             return state;

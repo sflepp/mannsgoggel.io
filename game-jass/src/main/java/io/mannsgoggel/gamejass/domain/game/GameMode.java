@@ -1,4 +1,4 @@
-package com.manoggeli.gamejass.domain.game;
+package io.mannsgoggel.gamejass.domain.game;
 
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
@@ -6,9 +6,7 @@ import org.javatuples.Triplet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-
-import static com.manoggeli.gamejass.domain.game.Card.Color.*;
-import static com.manoggeli.gamejass.domain.game.Card.Suit.*;
+import java.util.stream.Collectors;
 
 public interface GameMode {
     enum PlayingMode {
@@ -19,21 +17,21 @@ public interface GameMode {
 
     Integer getPoints(Card card);
 
-    Card winningCard(Stack<Card> card);
+    Card winningCard(List<Card> tableStack);
 
     Card higherCard(Card a, Card b);
 
-    Boolean canPlayCard(Card card, Stack<Card> tableStack, Set<Card> playerCards);
+    Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack);
 
     class Builder {
         static GameMode build(PlayingMode mode) {
             return switch (mode) {
                 case BOTTOM_UP -> new GameMode.BottomUp();
                 case TOP_DOWN -> new GameMode.TopDown();
-                case TRUMP_HEARTHS -> new GameMode.Trump(HEARTHS);
-                case TRUMP_SPADES -> new GameMode.Trump(SPADES);
-                case TRUMP_DIAMONDS -> new GameMode.Trump(DIAMONDS);
-                case TRUMP_CLUBS -> new GameMode.Trump(CLUBS);
+                case TRUMP_HEARTHS -> new GameMode.Trump(Card.Color.HEARTHS);
+                case TRUMP_SPADES -> new GameMode.Trump(Card.Color.SPADES);
+                case TRUMP_DIAMONDS -> new GameMode.Trump(Card.Color.DIAMONDS);
+                case TRUMP_CLUBS -> new GameMode.Trump(Card.Color.CLUBS);
             };
         }
     }
@@ -41,15 +39,15 @@ public interface GameMode {
     class BottomUp implements GameMode {
 
         private static final List<Pair<Card.Suit, Integer>> VALUES = List.of(
-                Pair.with(ACE, 0),
-                Pair.with(KING, 4),
-                Pair.with(QUEEN, 3),
-                Pair.with(JACK, 2),
-                Pair.with(TEN, 10),
-                Pair.with(NINE, 0),
-                Pair.with(EIGHT, 8),
-                Pair.with(SEVEN, 0),
-                Pair.with(SIX, 11)
+                Pair.with(Card.Suit.ACE, 0),
+                Pair.with(Card.Suit.KING, 4),
+                Pair.with(Card.Suit.QUEEN, 3),
+                Pair.with(Card.Suit.JACK, 2),
+                Pair.with(Card.Suit.TEN, 10),
+                Pair.with(Card.Suit.NINE, 0),
+                Pair.with(Card.Suit.EIGHT, 8),
+                Pair.with(Card.Suit.SEVEN, 0),
+                Pair.with(Card.Suit.SIX, 11)
         );
 
         private Pair<Card.Suit, Integer> getPairFor(Card card) {
@@ -70,10 +68,10 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(Stack<Card> cards) {
-            var firstCardColor = cards.get(0).getColor();
+        public Card winningCard(List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
 
-            return cards.stream()
+            return tableStack.stream()
                     .reduce((highestCard, card)
                             -> card.getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));
@@ -82,21 +80,32 @@ public interface GameMode {
         @Override
         public Card higherCard(Card a, Card b) {
             return getRankOrder(a) > getRankOrder(b) ? a : b;
+        }
+
+        @Override
+        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
+
+            var validCards = playerCards.stream()
+                    .filter(card -> card.getColor().equals(firstCardColor))
+                    .collect(Collectors.toSet());
+
+            return validCards.size() == 0 ? playerCards : validCards;
         }
     }
 
     class TopDown implements GameMode {
 
         private static final List<Pair<Card.Suit, Integer>> VALUES = List.of(
-                Pair.with(SIX, 0),
-                Pair.with(SEVEN, 0),
-                Pair.with(EIGHT, 8),
-                Pair.with(NINE, 0),
-                Pair.with(TEN, 10),
-                Pair.with(JACK, 2),
-                Pair.with(QUEEN, 3),
-                Pair.with(KING, 4),
-                Pair.with(ACE, 11)
+                Pair.with(Card.Suit.SIX, 0),
+                Pair.with(Card.Suit.SEVEN, 0),
+                Pair.with(Card.Suit.EIGHT, 8),
+                Pair.with(Card.Suit.NINE, 0),
+                Pair.with(Card.Suit.TEN, 10),
+                Pair.with(Card.Suit.JACK, 2),
+                Pair.with(Card.Suit.QUEEN, 3),
+                Pair.with(Card.Suit.KING, 4),
+                Pair.with(Card.Suit.ACE, 11)
         );
 
         private Pair<Card.Suit, Integer> getPairFor(Card card) {
@@ -117,10 +126,10 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(Stack<Card> cards) {
-            var firstCardColor = cards.get(0).getColor();
+        public Card winningCard(List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
 
-            return cards.stream()
+            return tableStack.stream()
                     .reduce((highestCard, card)
                             -> card.getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));
@@ -130,34 +139,45 @@ public interface GameMode {
         public Card higherCard(Card a, Card b) {
             return getRankOrder(a) > getRankOrder(b) ? a : b;
         }
+
+        @Override
+        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
+
+            var validCards = playerCards.stream()
+                    .filter(card -> card.getColor().equals(firstCardColor))
+                    .collect(Collectors.toSet());
+
+            return validCards.size() == 0 ? playerCards : validCards;
+        }
     }
 
     class Trump implements GameMode {
 
         private static final List<Triplet<Boolean, Card.Suit, Integer>> VALUES = List.of(
-                Triplet.with(false, SIX, 0),
-                Triplet.with(false, SEVEN, 0),
-                Triplet.with(false, EIGHT, 0),
-                Triplet.with(false, NINE, 0),
-                Triplet.with(false, TEN, 10),
-                Triplet.with(false, JACK, 2),
-                Triplet.with(false, QUEEN, 3),
-                Triplet.with(false, KING, 4),
-                Triplet.with(false, ACE, 11),
-                Triplet.with(true, SIX, 0),
-                Triplet.with(true, SEVEN, 0),
-                Triplet.with(true, EIGHT, 0),
-                Triplet.with(true, TEN, 10),
-                Triplet.with(true, QUEEN, 3),
-                Triplet.with(true, KING, 4),
-                Triplet.with(true, ACE, 11),
-                Triplet.with(true, NINE, 14),
-                Triplet.with(true, JACK, 20)
+                Triplet.with(false, Card.Suit.SIX, 0),
+                Triplet.with(false, Card.Suit.SEVEN, 0),
+                Triplet.with(false, Card.Suit.EIGHT, 0),
+                Triplet.with(false, Card.Suit.NINE, 0),
+                Triplet.with(false, Card.Suit.TEN, 10),
+                Triplet.with(false, Card.Suit.JACK, 2),
+                Triplet.with(false, Card.Suit.QUEEN, 3),
+                Triplet.with(false, Card.Suit.KING, 4),
+                Triplet.with(false, Card.Suit.ACE, 11),
+                Triplet.with(true, Card.Suit.SIX, 0),
+                Triplet.with(true, Card.Suit.SEVEN, 0),
+                Triplet.with(true, Card.Suit.EIGHT, 0),
+                Triplet.with(true, Card.Suit.TEN, 10),
+                Triplet.with(true, Card.Suit.QUEEN, 3),
+                Triplet.with(true, Card.Suit.KING, 4),
+                Triplet.with(true, Card.Suit.ACE, 11),
+                Triplet.with(true, Card.Suit.NINE, 14),
+                Triplet.with(true, Card.Suit.JACK, 20)
         );
 
         private final Card.Color trumpColor;
 
-        public Trump(Card.Color trumpColor) {
+        Trump(Card.Color trumpColor) {
             this.trumpColor = trumpColor;
         }
 
@@ -177,10 +197,24 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(Stack<Card> cards) {
-            var firstCardColor = cards.get(0).getColor();
+        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
 
-            return cards.stream()
+            var validCards = playerCards.stream()
+                    .filter(card -> card.getColor().equals(firstCardColor)
+                            || (isTrumpCard(card) && higherCard(card, winningCard(tableStack)).equals(card)))
+                    .collect(Collectors.toSet());
+
+            return validCards.size() == 0
+                    || (validCards.size() == 1 && validCards.contains(new Card(trumpColor, Card.Suit.JACK)))
+                    ? playerCards : validCards;
+        }
+
+        @Override
+        public Card winningCard(List<Card> tableStack) {
+            var firstCardColor = tableStack.get(0).getColor();
+
+            return tableStack.stream()
                     .reduce((highestCard, card)
                             -> card.getColor() == firstCardColor || isTrumpCard(card) ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));

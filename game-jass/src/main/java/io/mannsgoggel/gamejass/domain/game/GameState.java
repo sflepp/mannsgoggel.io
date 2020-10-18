@@ -1,8 +1,9 @@
-package com.manoggeli.gamejass.domain.game;
+package io.mannsgoggel.gamejass.domain.game;
 
-import com.manoggeli.gamejass.domain.Team;
+import io.mannsgoggel.gamejass.domain.Team;
 import org.javatuples.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ public class GameState {
     private Boolean shifted;
 
     private List<Team> teams;
-    private Stack<Pair<String, Card>> tableStack = new Stack<>();
+    private List<Pair<String, Card>> tableStack = new ArrayList<>();
 
     public GameState(JassActions.ActionType nextAction, String currentPlayer, List<Team> playersInPlayingOrder) {
         this.nextAction = nextAction;
@@ -63,11 +64,15 @@ public class GameState {
         this.currentPlayer = currentPlayer;
     }
 
-    public Stack<Pair<String, Card>> getTableStack() {
+    public List<Pair<String, Card>> getTableStack() {
         return tableStack;
     }
 
-    public void setTableStack(Stack<Pair<String, Card>> tableStack) {
+    public List<Card> getTableStackWithoutPlayer() {
+        return tableStack.stream().map(Pair::getValue1).collect(Collectors.toList());
+    }
+
+    public void setTableStack(List<Pair<String, Card>> tableStack) {
         this.tableStack = tableStack;
     }
 
@@ -111,6 +116,14 @@ public class GameState {
                                 .anyMatch(player -> player.getName().equals(currentPlayer)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
+    }
+
+    public String getPlayerNameForPlayedCard(Card card) {
+        return tableStack.stream()
+                .filter(c -> c.getValue1().equals(card))
+                .map(Pair::getValue0)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Card not found."));
     }
 
     public JassActions.ActionType getNextAction() {

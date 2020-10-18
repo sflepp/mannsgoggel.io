@@ -1,7 +1,7 @@
-package com.manoggeli.gamejass.domain;
+package io.mannsgoggel.gamejass.domain;
 
-import com.manoggeli.gamejass.domain.game.GameMode;
-import com.manoggeli.gamejass.domain.game.Player;
+import io.mannsgoggel.gamejass.domain.game.GameMode;
+import io.mannsgoggel.gamejass.domain.game.Player;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package com.manoggeli.gamejass.domain.game;
+package io.mannsgoggel.gamejass.domain.game;
 
-import com.manoggeli.gamejass.domain.Team;
+import io.mannsgoggel.gamejass.domain.Team;
 
 import java.util.ArrayList;
 import java.util.List;

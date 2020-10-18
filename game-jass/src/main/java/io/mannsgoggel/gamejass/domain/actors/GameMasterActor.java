@@ -1,10 +1,10 @@
-package com.manoggeli.gamejass.domain.actors;
+package io.mannsgoggel.gamejass.domain.actors;
 
-import com.manoggeli.gamejass.domain.game.GameState;
-import com.manoggeli.gamejass.domain.Store;
-import com.manoggeli.gamejass.domain.game.CardDeckBuilder;
-import com.manoggeli.gamejass.domain.game.JassActions;
-import com.manoggeli.gamejass.observer.Observer;
+import io.mannsgoggel.gamejass.domain.game.GameState;
+import io.mannsgoggel.gamejass.domain.Store;
+import io.mannsgoggel.gamejass.domain.game.CardDeckBuilder;
+import io.mannsgoggel.gamejass.domain.game.JassActions;
+import io.mannsgoggel.gamejass.observer.Observer;
 
 public class GameMasterActor implements Observer<GameState> {
 

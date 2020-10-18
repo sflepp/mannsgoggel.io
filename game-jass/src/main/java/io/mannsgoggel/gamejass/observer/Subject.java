@@ -1,4 +1,4 @@
-package com.manoggeli.gamejass.observer;
+package io.mannsgoggel.gamejass.observer;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package com.manoggeli.gamejass.domain.game;
+package io.mannsgoggel.gamejass.domain.game;
 
 public class Card {
     public enum Color {

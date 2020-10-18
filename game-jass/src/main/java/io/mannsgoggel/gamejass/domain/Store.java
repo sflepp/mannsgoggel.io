@@ -1,8 +1,8 @@
-package com.manoggeli.gamejass.domain;
+package io.mannsgoggel.gamejass.domain;
 
-import com.manoggeli.gamejass.domain.action.Action;
-import com.manoggeli.gamejass.domain.game.GameState;
-import com.manoggeli.gamejass.observer.Subject;
+import io.mannsgoggel.gamejass.domain.action.Action;
+import io.mannsgoggel.gamejass.domain.game.GameState;
+import io.mannsgoggel.gamejass.observer.Subject;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
-package com.manoggeli.gamejass.domain.action;
+package io.mannsgoggel.gamejass.domain.action;
 
-import com.manoggeli.gamejass.domain.game.GameState;
-import com.manoggeli.gamejass.domain.game.JassActions;
+import io.mannsgoggel.gamejass.domain.game.GameState;
+import io.mannsgoggel.gamejass.domain.game.JassActions;
 
 public interface Action<T> {
     JassActions.ActionType getAction();
