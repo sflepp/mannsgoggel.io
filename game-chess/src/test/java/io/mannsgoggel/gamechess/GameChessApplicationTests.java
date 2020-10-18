@@ -1,4 +1,4 @@
-package com.manoggeli.gamechess;
+package io.mannsgoggel.gamechess;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

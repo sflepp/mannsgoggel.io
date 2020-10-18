@@ -1,4 +1,4 @@
-package com.manoggeli.gamechess;
+package io.mannsgoggel.gamechess;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
