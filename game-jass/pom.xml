@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.manoggeli</groupId>
-	<artifactId>game-jass</artifactId>
+	<artifactId>game-store</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>game-jass</name>
+	<name>game-store</name>
 	<description>Jass game</description>
 
 	<properties>

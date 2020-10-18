@@ -1,7 +1,7 @@
 package com.manoggeli.gamejass.domain;
 
-import com.manoggeli.gamejass.domain.gameObjects.Card;
-import com.manoggeli.gamejass.domain.gameObjects.Player;
+import com.manoggeli.gamejass.domain.game.Card;
+import com.manoggeli.gamejass.domain.game.Player;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;

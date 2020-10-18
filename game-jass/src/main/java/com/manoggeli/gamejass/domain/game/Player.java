@@ -1,4 +1,4 @@
-package com.manoggeli.gamejass.domain.gameObjects;
+package com.manoggeli.gamejass.domain.game;
 
 import java.util.Set;
 

@@ -14,7 +14,7 @@
 
     <modules>
         <module>game-chess</module>
-        <module>game-jass</module>
+        <module>game-store</module>
     </modules>
 
 </project>

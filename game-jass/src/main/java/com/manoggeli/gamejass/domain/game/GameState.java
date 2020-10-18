@@ -1,7 +1,6 @@
-package com.manoggeli.gamejass.domain.gameObjects;
+package com.manoggeli.gamejass.domain.game;
 
 import com.manoggeli.gamejass.domain.Team;
-import com.manoggeli.gamejass.domain.action.Action;
 import org.javatuples.Pair;
 
 import java.util.List;
@@ -9,29 +8,43 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class GameState {
-    private Action.ActionType nextAction;
+    private JassActions.ActionType nextAction;
     private String currentPlayer;
-    private Boolean isShift;
+
+    private GameMode gameMode;
+    private Boolean shifted;
 
     private List<Team> teams;
     private Stack<Pair<String, Card>> tableStack = new Stack<>();
 
-    public GameState(Action.ActionType nextAction, String currentPlayer, List<Team> playersInPlayingOrder) {
+    public GameState(JassActions.ActionType nextAction, String currentPlayer, List<Team> playersInPlayingOrder) {
         this.nextAction = nextAction;
         this.currentPlayer = currentPlayer;
         this.teams = playersInPlayingOrder;
     }
 
-    public void setNextAction(Action.ActionType currentAction) {
+    public void setNextAction(JassActions.ActionType currentAction) {
         this.nextAction = currentAction;
     }
 
-    public Boolean isShifted() {
-        return isShift;
+    public GameMode getGameMode() {
+        return gameMode;
     }
 
-    public void setShifted(Boolean shift) {
-        isShift = shift;
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public Boolean getShifted() {
+        return shifted;
+    }
+
+    public Boolean isShifted() {
+        return shifted;
+    }
+
+    public void setShifted(Boolean shifted) {
+        this.shifted = shifted;
     }
 
     public void setTeams(List<Team> teams) {
@@ -100,7 +113,7 @@ public class GameState {
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
     }
 
-    public Action.ActionType getNextAction() {
+    public JassActions.ActionType getNextAction() {
         return nextAction;
     }
 }

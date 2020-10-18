@@ -1,12 +1,12 @@
 package com.manoggeli.gamejass.domain;
 
 import com.manoggeli.gamejass.domain.action.Action;
-import com.manoggeli.gamejass.domain.gameObjects.GameState;
-import com.manoggeli.gamejass.domain.gameObjects.Player;
+import com.manoggeli.gamejass.domain.game.GameState;
+import com.manoggeli.gamejass.domain.game.Player;
 
 import java.util.List;
 
-import static com.manoggeli.gamejass.domain.action.Action.ActionType.START_ROUND;
+import static com.manoggeli.gamejass.domain.game.JassActions.ActionType.START_ROUND;
 
 
 public class Reducer {
