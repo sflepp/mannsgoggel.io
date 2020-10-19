@@ -1,4 +1,4 @@
-package io.mannsgoggel.gamejass.observer;
+package io.mannsgoggel.gamejass.domain.observer;
 
 import java.util.ArrayList;
 import java.util.List;

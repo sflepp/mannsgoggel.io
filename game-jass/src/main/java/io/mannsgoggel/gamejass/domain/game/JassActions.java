@@ -5,13 +5,14 @@ import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
 
 public class JassActions {
     public enum ActionType {
+        START_GAME,
         START_ROUND,
         HAND_OUT_CARDS,
         SET_STARTING_PLAYER,
@@ -24,9 +25,27 @@ public class JassActions {
         END_GAME
     }
 
+    public static class StartGame extends Action.BaseAction<Void> {
+        public StartGame() {
+            super(START_GAME, null, null);
+        }
+
+        @Override
+        public GameState reduce(GameState state) {
+            state.setGameEnded(false);
+            state.setNextPlayer("game-master");
+            return state;
+        }
+
+        @Override
+        public ActionType nextAction(GameState state) {
+            return START_ROUND;
+        }
+    }
+
     public static class StartRound extends Action.BaseAction<Void> {
-        public StartRound(String player, Void payload) {
-            super(START_ROUND, player, payload);
+        public StartRound(String player) {
+            super(START_ROUND, player, null);
         }
 
         @Override
@@ -41,9 +60,9 @@ public class JassActions {
         }
     }
 
-    public static class HandOutCards extends Action.BaseAction<Map<String, Set<Card>>> {
-        public HandOutCards(String player, Map<String, Set<Card>> payload) {
-            super(SET_PLAYING_MODE, player, payload);
+    public static class HandOutCards extends Action.BaseAction<Map<String, List<Card>>> {
+        public HandOutCards(String player, Map<String, List<Card>> payload) {
+            super(HAND_OUT_CARDS, player, payload);
         }
 
         @Override
@@ -75,7 +94,7 @@ public class JassActions {
 
         @Override
         public ActionType nextAction(GameState state) {
-            return SET_PLAYING_MODE;
+            return DECIDE_SHIFT;
         }
     }
 
@@ -157,7 +176,7 @@ public class JassActions {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
             }
 
-            handCards.remove(card);
+            state.getPlayerByName(getPlayer()).removeHandCard(card);
             state.getTableStack().add(Pair.with(getPlayer(), card));
 
             if (state.isStichFinished()) {
@@ -176,8 +195,8 @@ public class JassActions {
     }
 
     public static class EndStich extends Action.BaseAction<Void> {
-        public EndStich(String player, Void payload) {
-            super(END_STICH, player, payload);
+        public EndStich(String player) {
+            super(END_STICH, player, null);
         }
 
         @Override
@@ -213,8 +232,8 @@ public class JassActions {
     }
 
     public static class EndRound extends Action.BaseAction<Void> {
-        public EndRound(String player, Void payload) {
-            super(END_ROUND, player, payload);
+        public EndRound(String player) {
+            super(END_ROUND, player, null);
         }
 
         @Override
@@ -225,6 +244,23 @@ public class JassActions {
         @Override
         public ActionType nextAction(GameState state) {
             return state.getTeams().stream().anyMatch(team -> team.getPoints() >= 1500) ? END_GAME : START_ROUND;
+        }
+    }
+
+    public static class EndGame extends Action.BaseAction<Void> {
+        public EndGame(String player) {
+            super(END_GAME, player, null);
+        }
+
+        @Override
+        public GameState reduce(GameState state) {
+            state.setGameEnded(true);
+            return state;
+        }
+
+        @Override
+        public ActionType nextAction(GameState state) {
+            return END_GAME;
         }
     }
 }

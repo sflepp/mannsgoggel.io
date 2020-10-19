@@ -1,10 +1,11 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Player {
     private final String name;
-    private Set<Card> handCards;
+    private List<Card> handCards;
 
     public Player(String name) {
         this.name = name;
@@ -14,11 +15,25 @@ public class Player {
         return name;
     }
 
-    public Set<Card> getHandCards() {
+    public List<Card> getHandCards() {
         return handCards;
     }
 
-    public void setHandCards(Set<Card> handCards) {
+    public void setHandCards(List<Card> handCards) {
         this.handCards = handCards;
+    }
+
+    public void removeHandCard(Card card) {
+        handCards = handCards.stream()
+                .filter(c -> !c.equals(card))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "name='" + name + '\'' +
+                ", handCards=" + handCards +
+                '}';
     }
 }

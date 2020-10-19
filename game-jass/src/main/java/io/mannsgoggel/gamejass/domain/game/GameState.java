@@ -12,6 +12,7 @@ public class GameState {
 
     private GameMode gameMode;
     private Boolean shifted;
+    private Boolean gameEnded;
 
     private List<Team> teams;
     private List<Pair<String, Card>> tableStack = new ArrayList<>();
@@ -111,7 +112,7 @@ public class GameState {
         return teams.stream()
                 .filter(team ->
                         team.getPlayers().stream()
-                                .anyMatch(player -> player.getName().equals(nextPlayer)))
+                                .anyMatch(player -> player.getName().equals(playerName)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
     }
@@ -126,5 +127,13 @@ public class GameState {
 
     public JassActions.ActionType getNextAction() {
         return nextAction;
+    }
+
+    public Boolean getGameEnded() {
+        return gameEnded;
+    }
+
+    public void setGameEnded(Boolean gameEnded) {
+        this.gameEnded = gameEnded;
     }
 }

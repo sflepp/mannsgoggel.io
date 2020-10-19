@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JassRules {
-
     public static Player nextPlayer(Player currentPlayer, List<Team> teams) {
         List<Player> playerOrder = new ArrayList<>();
         playerOrder.add(teams.get(0).getPlayers().get(0));

@@ -4,15 +4,9 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import java.util.List;
-import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public interface GameMode {
-    enum PlayingMode {
-        TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
-    }
-
     Integer getRankOrder(Card card);
 
     Integer getPoints(Card card);
@@ -21,7 +15,11 @@ public interface GameMode {
 
     Card higherCard(Card a, Card b);
 
-    Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack);
+    List<Card> playableCards(List<Card> handCards, List<Card> tableStack);
+
+    enum PlayingMode {
+        TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
+    }
 
     class Builder {
         static GameMode build(PlayingMode mode) {
@@ -83,14 +81,18 @@ public interface GameMode {
         }
 
         @Override
-        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+            if (tableStack.isEmpty()) {
+                return handCards;
+            }
+
             var firstCardColor = tableStack.get(0).getColor();
 
-            var validCards = playerCards.stream()
+            var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
 
-            return validCards.size() == 0 ? playerCards : validCards;
+            return validCards.size() == 0 ? handCards : validCards;
         }
     }
 
@@ -141,14 +143,18 @@ public interface GameMode {
         }
 
         @Override
-        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+            if (tableStack.isEmpty()) {
+                return handCards;
+            }
+
             var firstCardColor = tableStack.get(0).getColor();
 
-            var validCards = playerCards.stream()
+            var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
 
-            return validCards.size() == 0 ? playerCards : validCards;
+            return validCards.size() == 0 ? handCards : validCards;
         }
     }
 
@@ -197,17 +203,21 @@ public interface GameMode {
         }
 
         @Override
-        public Set<Card> playableCards(Set<Card> playerCards, List<Card> tableStack) {
+        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+            if (tableStack.isEmpty()) {
+                return List.copyOf(handCards);
+            }
+
             var firstCardColor = tableStack.get(0).getColor();
 
-            var validCards = playerCards.stream()
+            var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor)
                             || (isTrumpCard(card) && higherCard(card, winningCard(tableStack)).equals(card)))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
 
             return validCards.size() == 0
                     || (validCards.size() == 1 && validCards.contains(new Card(trumpColor, Card.Suit.JACK)))
-                    ? playerCards : validCards;
+                    ? handCards : validCards;
         }
 
         @Override

@@ -40,21 +40,29 @@ public class Card {
             return cards;
         }
 
-        public static Map<String, Set<Card>> buildAndShuffleFor(List<Player> players) {
+        public static Map<String, List<Card>> buildAndShuffleFor(List<Player> players) {
             List<Card> cards = Card.CardDeckBuilder.build();
 
             Collections.shuffle(cards);
 
-            Map<String, Set<Card>> cardsPerPlayer = new HashMap<>();
+            Map<String, List<Card>> cardsPerPlayer = new HashMap<>();
 
             for (int i = 0; i < players.size(); i++) {
                 cardsPerPlayer.put(
                         players.get(i).getName(),
-                        Set.copyOf(cards.subList(i * 8, (i + 1) * 8 - 1))
+                        cards.subList(i * 8, (i + 1) * 8 - 1)
                 );
             }
 
             return cardsPerPlayer;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Card{" +
+                "color=" + color +
+                ", suit=" + suit +
+                '}';
     }
 }

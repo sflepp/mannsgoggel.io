@@ -1,4 +1,4 @@
-package io.mannsgoggel.gamejass.observer;
+package io.mannsgoggel.gamejass.domain.observer;
 
 public class Subscription<T> {
 
