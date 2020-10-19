@@ -8,25 +8,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Store {
     private static final Logger LOGGER = LoggerFactory.getLogger(Store.class);
     private final List<Action> actions = new ArrayList<>();
     private final Subject<GameState> state = new Subject<>(null);
+
     private GameState currentState;
 
     public void dispatchAction(Action action) {
+        LOGGER.info(action.getPlayer() + " | " + action.getAction() + (action.getPayload() == null ? "" : (" | " + action.getPayload())));
 
-        LOGGER.info("[" + action.getPlayer() + ":" + action.getAction() + "] " + action.getPayload());
-
-        currentState = Reducer.reduceAll(
-                Stream.concat(actions.stream(), List.of(action).stream()).collect(Collectors.toList())
-        );
-
+        currentState = action.reduce(currentState);
+        currentState.setNextAction(action.nextAction(currentState));
         state.next(currentState);
-
         actions.add(action);
     }
 

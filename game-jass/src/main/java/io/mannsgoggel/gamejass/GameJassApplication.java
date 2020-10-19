@@ -28,17 +28,20 @@ public class GameJassApplication {
 		player3.connect();
 		player4.connect();
 
-
 		store.dispatchAction(new JassActions.StartGame());
 
 		while (!store.getCurrentState().getGameEnded()) {
-			gameMaster.executeNextActionIfPresent();
-			player1.executeNextActionIfPresent();
-			player2.executeNextActionIfPresent();
-			player3.executeNextActionIfPresent();
-			player4.executeNextActionIfPresent();
+			gameMaster.dispatchAction();
+			player1.dispatchAction();
+			player2.dispatchAction();
+			player3.dispatchAction();
+			player4.dispatchAction();
 		}
 
-		System.out.println("adsf");
+		gameMaster.disconnect();
+		player1.disconnect();
+		player2.disconnect();
+		player3.disconnect();
+		player4.disconnect();
 	}
 }

@@ -12,15 +12,15 @@ public class GameState {
 
     private GameMode gameMode;
     private Boolean shifted;
-    private Boolean gameEnded;
+    private Boolean gameEnded = false;
 
     private List<Team> teams;
     private List<Pair<String, Card>> tableStack = new ArrayList<>();
 
-    public GameState(JassActions.ActionType nextAction, String nextPlayer, List<Team> playersInPlayingOrder) {
+    public GameState(JassActions.ActionType nextAction, String nextPlayer, List<Team> teams) {
         this.nextAction = nextAction;
         this.nextPlayer = nextPlayer;
-        this.teams = playersInPlayingOrder;
+        this.teams = teams;
     }
 
     public void setNextAction(JassActions.ActionType currentAction) {

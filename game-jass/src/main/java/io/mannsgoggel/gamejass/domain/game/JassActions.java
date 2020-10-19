@@ -3,6 +3,8 @@ package io.mannsgoggel.gamejass.domain.game;
 import io.mannsgoggel.gamejass.domain.action.Action;
 import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +34,14 @@ public class JassActions {
 
         @Override
         public GameState reduce(GameState state) {
-            state.setGameEnded(false);
-            state.setNextPlayer("game-master");
-            return state;
+            return new GameState(
+                    START_ROUND,
+                    "game-master",
+                    List.of(
+                            new Team(List.of(new Player("player-1"), new Player("player-2"))),
+                            new Team(List.of(new Player("player-3"), new Player("player-4")))
+                    )
+            );
         }
 
         @Override
@@ -167,7 +174,6 @@ public class JassActions {
         @Override
         public GameState reduce(GameState state) {
             var card = getPayload();
-            var handCards = state.getPlayerByName(getPlayer()).getHandCards();
             var tableStack = state.getTableStackWithoutPlayer();
             var player = state.getPlayerByName(getPlayer());
             var playerCards = player.getHandCards();
@@ -195,6 +201,9 @@ public class JassActions {
     }
 
     public static class EndStich extends Action.BaseAction<Void> {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(EndStich.class);
+
         public EndStich(String player) {
             super(END_STICH, player, null);
         }
@@ -209,12 +218,13 @@ public class JassActions {
                     .mapToInt(card -> state.getGameMode().getPoints(card))
                     .sum();
 
+            LOGGER.info(winningPlayer + " wins with " + winningCard);
+
             winningTeam.obtainCards(state.getTableStack());
             winningTeam.addPoints(points);
             state.setTableStack(new ArrayList<>());
 
             if (state.isRoundFinished()) {
-
                 winningTeam.addPoints(5);
 
                 state.setNextPlayer("game-master");

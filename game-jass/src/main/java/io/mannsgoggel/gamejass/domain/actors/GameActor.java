@@ -56,7 +56,7 @@ public abstract class GameActor implements Observer<GameState> {
         return Optional.of(action);
     }
 
-    public void executeNextActionIfPresent() {
+    public void dispatchAction() {
         if (nextAction.isPresent()) {
             var next = nextAction;
             nextAction = Optional.empty();
