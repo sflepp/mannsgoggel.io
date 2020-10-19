@@ -1,7 +1,5 @@
-package io.mannsgoggel.gamejass.domain;
+package io.mannsgoggel.gamejass.domain.game;
 
-import io.mannsgoggel.gamejass.domain.game.Card;
-import io.mannsgoggel.gamejass.domain.game.Player;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
@@ -11,6 +9,7 @@ import java.util.List;
 public class Team {
     private List<Player> players;
     private List<Pair<String, Card>> obtainedCards = new ArrayList<>();
+    private Integer points = 0;
 
     public Team(List<Player> players) {
         this.players = players;
@@ -18,6 +17,22 @@ public class Team {
 
     public List<Player> getPlayers() {
         return players;
+    }
+
+    public List<Pair<String, Card>> getObtainedCards() {
+        return obtainedCards;
+    }
+
+    public Integer getPoints() {
+        return points;
+    }
+
+    public void setPoints(Integer points) {
+        this.points = points;
+    }
+
+    public void addPoints(Integer points) {
+        this.points += points;
     }
 
     public boolean containsPlayer(String playerName) {
@@ -34,16 +49,5 @@ public class Team {
 
     public void obtainCards(Collection<Pair<String, Card>> cards) {
         obtainedCards.addAll(cards);
-    }
-
-    public Integer getPoints() {
-        return obtainedCards
-                .stream()
-                .map(card -> card.getValue1().getPoints())
-                .reduce(0, Integer::sum);
-    }
-
-    public boolean hasWon() {
-        return getPoints() >= 1500;
     }
 }

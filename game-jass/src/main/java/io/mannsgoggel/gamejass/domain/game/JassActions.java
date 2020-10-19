@@ -5,9 +5,8 @@ import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
 
@@ -21,17 +20,18 @@ public class JassActions {
         START_STICH,
         PLAY_CARD,
         END_STICH,
-        END_ROUND
+        END_ROUND,
+        END_GAME
     }
 
-    public static class StartRound extends Action.BaseAction<Set<Card>> {
-        public StartRound(String player, Set<Card> payload) {
+    public static class StartRound extends Action.BaseAction<Void> {
+        public StartRound(String player, Void payload) {
             super(START_ROUND, player, payload);
         }
 
         @Override
         public GameState reduce(GameState state) {
-            state.setCurrentPlayer("game-master");
+            state.setNextPlayer("game-master");
             return state;
         }
 
@@ -41,19 +41,17 @@ public class JassActions {
         }
     }
 
-    public static class HandOutCards extends Action.BaseAction<List<Player>> {
-        public HandOutCards(String player, List<Player> payload) {
+    public static class HandOutCards extends Action.BaseAction<Map<String, Set<Card>>> {
+        public HandOutCards(String player, Map<String, Set<Card>> payload) {
             super(SET_PLAYING_MODE, player, payload);
         }
 
         @Override
         public GameState reduce(GameState state) {
 
-            getPayload().forEach(player ->
-                    state.getPlayerByName(player.getName()).setHandCards(player.getHandCards())
-            );
+            getPayload().forEach((key, value) -> state.getPlayerByName(key).setHandCards(value));
 
-            state.setCurrentPlayer("game-master");
+            state.setNextPlayer("game-master");
 
             return state;
         }
@@ -71,7 +69,7 @@ public class JassActions {
 
         @Override
         public GameState reduce(GameState state) {
-            state.setCurrentPlayer(getPayload());
+            state.setNextPlayer(getPayload());
             return state;
         }
 
@@ -93,9 +91,9 @@ public class JassActions {
             state.setShifted(shift);
 
             if (shift) {
-                var teamMate = state.getTeamMateFor(state.getCurrentPlayer());
+                var teamMate = state.getTeamMateFor(state.getNextPlayer());
 
-                state.setCurrentPlayer(teamMate.getName());
+                state.setNextPlayer(teamMate.getName());
             }
 
             return state;
@@ -119,9 +117,9 @@ public class JassActions {
             state.setGameMode(GameMode.Builder.build(playingMode));
 
             if (state.isShifted()) {
-                var teamMate = state.getTeamMateFor(state.getCurrentPlayer());
+                var teamMate = state.getTeamMateFor(state.getNextPlayer());
 
-                state.setCurrentPlayer(teamMate.getName());
+                state.setNextPlayer(teamMate.getName());
             }
 
             return state;
@@ -133,24 +131,16 @@ public class JassActions {
         }
     }
 
-    public static class StartStich extends Action.BaseAction<Void> {
-
-        StartStich(String player, Void payload) {
+    public static class StartStich extends PlayCard {
+        public StartStich(String player, Card payload) {
             super(START_STICH, player, payload);
-        }
-
-        @Override
-        public GameState reduce(GameState state) {
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return PLAY_CARD;
         }
     }
 
     public static class PlayCard extends Action.BaseAction<Card> {
+        public PlayCard(ActionType action, String player, Card payload) {
+            super(action, player, payload);
+        }
         public PlayCard(String player, Card payload) {
             super(PLAY_CARD, player, payload);
         }
@@ -171,9 +161,9 @@ public class JassActions {
             state.getTableStack().add(Pair.with(getPlayer(), card));
 
             if (state.isStichFinished()) {
-                state.setCurrentPlayer("game-master");
+                state.setNextPlayer("game-master");
             } else {
-                state.setCurrentPlayer(JassRules.nextPlayer(player, state.getTeams()).getName());
+                state.setNextPlayer(JassRules.nextPlayer(player, state.getTeams()).getName());
             }
 
             return state;
@@ -186,7 +176,7 @@ public class JassActions {
     }
 
     public static class EndStich extends Action.BaseAction<Void> {
-        EndStich(String player, Void payload) {
+        public EndStich(String player, Void payload) {
             super(END_STICH, player, payload);
         }
 
@@ -196,14 +186,21 @@ public class JassActions {
             var winningCard = state.getGameMode().winningCard(state.getTableStackWithoutPlayer());
             var winningPlayer = state.getPlayerNameForPlayedCard(winningCard);
             var winningTeam = state.getTeamWith(winningPlayer);
+            var points = state.getTableStackWithoutPlayer().stream()
+                    .mapToInt(card -> state.getGameMode().getPoints(card))
+                    .sum();
 
             winningTeam.obtainCards(state.getTableStack());
+            winningTeam.addPoints(points);
             state.setTableStack(new ArrayList<>());
 
             if (state.isRoundFinished()) {
-                state.setCurrentPlayer("game-master");
+
+                winningTeam.addPoints(5);
+
+                state.setNextPlayer("game-master");
             } else {
-                state.setCurrentPlayer(winningPlayer);
+                state.setNextPlayer(winningPlayer);
             }
 
             return state;
@@ -212,6 +209,22 @@ public class JassActions {
         @Override
         public ActionType nextAction(GameState state) {
             return state.isRoundFinished() ? END_ROUND : START_STICH;
+        }
+    }
+
+    public static class EndRound extends Action.BaseAction<Void> {
+        public EndRound(String player, Void payload) {
+            super(END_ROUND, player, payload);
+        }
+
+        @Override
+        public GameState reduce(GameState state) {
+            return state;
+        }
+
+        @Override
+        public ActionType nextAction(GameState state) {
+            return state.getTeams().stream().anyMatch(team -> team.getPoints() >= 1500) ? END_GAME : START_ROUND;
         }
     }
 }

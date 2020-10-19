@@ -11,15 +11,19 @@ import java.util.stream.Stream;
 
 public class Store {
     private List<Action> actions = new ArrayList<>();
-    private Subject<GameState> currentState = new Subject<>(null);
+    private Subject<GameState> state = new Subject<>(null);
 
     public void dispatchAction(Action action) {
-        currentState.next(
+        state.next(
                 Reducer.reduceAll(
                         Stream.concat(actions.stream(), List.of(action).stream()).collect(Collectors.toList())
                 )
         );
 
         actions.add(action);
+    }
+
+    public Subject<GameState> getState() {
+        return this.state;
     }
 }

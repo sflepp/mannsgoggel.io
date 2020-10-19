@@ -1,16 +1,14 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import io.mannsgoggel.gamejass.domain.Team;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class GameState {
     private JassActions.ActionType nextAction;
-    private String currentPlayer;
+    private String nextPlayer;
 
     private GameMode gameMode;
     private Boolean shifted;
@@ -18,9 +16,9 @@ public class GameState {
     private List<Team> teams;
     private List<Pair<String, Card>> tableStack = new ArrayList<>();
 
-    public GameState(JassActions.ActionType nextAction, String currentPlayer, List<Team> playersInPlayingOrder) {
+    public GameState(JassActions.ActionType nextAction, String nextPlayer, List<Team> playersInPlayingOrder) {
         this.nextAction = nextAction;
-        this.currentPlayer = currentPlayer;
+        this.nextPlayer = nextPlayer;
         this.teams = playersInPlayingOrder;
     }
 
@@ -56,12 +54,12 @@ public class GameState {
         return teams;
     }
 
-    public String getCurrentPlayer() {
-        return currentPlayer;
+    public String getNextPlayer() {
+        return nextPlayer;
     }
 
-    public void setCurrentPlayer(String currentPlayer) {
-        this.currentPlayer = currentPlayer;
+    public void setNextPlayer(String nextPlayer) {
+        this.nextPlayer = nextPlayer;
     }
 
     public List<Pair<String, Card>> getTableStack() {
@@ -113,7 +111,7 @@ public class GameState {
         return teams.stream()
                 .filter(team ->
                         team.getPlayers().stream()
-                                .anyMatch(player -> player.getName().equals(currentPlayer)))
+                                .anyMatch(player -> player.getName().equals(nextPlayer)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
     }

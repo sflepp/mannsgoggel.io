@@ -1,7 +1,5 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import io.mannsgoggel.gamejass.domain.Team;
-
 import java.util.ArrayList;
 import java.util.List;
 

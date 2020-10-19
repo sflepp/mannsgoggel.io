@@ -3,6 +3,7 @@ package io.mannsgoggel.gamejass.domain;
 import io.mannsgoggel.gamejass.domain.action.Action;
 import io.mannsgoggel.gamejass.domain.game.GameState;
 import io.mannsgoggel.gamejass.domain.game.Player;
+import io.mannsgoggel.gamejass.domain.game.Team;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class Reducer {
 
         for (Action action : actions) {
             state = action.reduce(state);
+            state.setNextAction(action.nextAction(state));
         }
 
         return state;
