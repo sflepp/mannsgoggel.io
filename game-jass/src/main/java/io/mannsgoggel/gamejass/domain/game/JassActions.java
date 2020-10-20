@@ -2,8 +2,6 @@ package io.mannsgoggel.gamejass.domain.game;
 
 import io.mannsgoggel.gamejass.domain.action.Action;
 import io.mannsgoggel.gamejass.domain.action.InvalidAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -149,15 +147,13 @@ public class JassActions {
             }
 
             state.queryPlayerByName(getPlayer()).removeHandCard(card);
-            state.getTableStack().add(new PlayedCard(getPlayer(), card));
+            state.getTableStack().add(card.play(getPlayer()));
             state.setNextPlayer(state.isStichFinished() ? "game-master" : nextPlayer(player, state.getTeams()).getName());
             state.setNextAction(state.isStichFinished() ? END_STICH : PLAY_CARD);
         }
     }
 
     public static class EndStich extends Action.BaseAction<Void> {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(EndStich.class);
 
         public EndStich(String player) {
             super(END_STICH, player, null);

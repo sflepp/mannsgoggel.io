@@ -17,6 +17,14 @@ public class Card {
         ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX
     }
 
+    public PlayedCard play(String player) {
+        return new PlayedCard(player, this);
+    }
+
+    public PlayedCard play() {
+        return new PlayedCard("", this);
+    }
+
     public static class CardDeckBuilder {
         public static List<Card> build() {
             List<Card> cards = new ArrayList<>();
@@ -40,7 +48,7 @@ public class Card {
             for (int i = 0; i < players.size(); i++) {
                 cardsPerPlayer.put(
                         players.get(i).getName(),
-                        cards.subList(i * 8, (i + 1) * 8 - 1)
+                        cards.subList(i * 9, (i + 1) * 9)
                 );
             }
 

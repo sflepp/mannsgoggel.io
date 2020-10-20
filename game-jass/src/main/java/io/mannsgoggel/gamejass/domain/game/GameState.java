@@ -1,5 +1,6 @@
 package io.mannsgoggel.gamejass.domain.game;
 
+import io.mannsgoggel.gamejass.domain.action.Action;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 public class GameState {
+    private List<Action> actionHistory = new ArrayList<>();
     private JassActions.ActionType nextAction;
     private String nextPlayer;
 

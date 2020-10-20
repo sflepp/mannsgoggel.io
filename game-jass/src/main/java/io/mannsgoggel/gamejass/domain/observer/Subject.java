@@ -1,9 +1,12 @@
 package io.mannsgoggel.gamejass.domain.observer;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+@Data
 public class Subject<T> {
     private T state;
 

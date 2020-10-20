@@ -1,47 +1,27 @@
 package io.mannsgoggel.gamejass;
 
-import io.mannsgoggel.gamejass.domain.Store;
 import io.mannsgoggel.gamejass.domain.actors.LocalGameMasterActor;
 import io.mannsgoggel.gamejass.domain.actors.LocalPlayerActor;
-import io.mannsgoggel.gamejass.domain.game.JassActions;
+import io.mannsgoggel.gamejass.domain.game.GameResult;
+import io.mannsgoggel.gamejass.domain.game.JassGame;
 import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+import java.util.List;
+
 public class GameJassApplication {
 
-	public static void main(String[] args) {
-		//SpringApplication.run(GameJassApplication.class, args);
+    public static void main(String[] args) {
+        JassGame game = new JassGame(
+                new LocalGameMasterActor(),
+                List.of(
+                        new LocalPlayerActor("player-1", new RandomJassStrategy()),
+                        new LocalPlayerActor("player-2", new RandomJassStrategy()),
+                        new LocalPlayerActor("player-3", new RandomJassStrategy()),
+                        new LocalPlayerActor("player-4", new RandomJassStrategy())
+                ));
 
-		Store store = new Store();
+        GameResult result = game.play();
 
-		LocalGameMasterActor gameMaster = new LocalGameMasterActor(store);
-		LocalPlayerActor player1 = new LocalPlayerActor("player-1", new RandomJassStrategy(), store);
-		LocalPlayerActor player2 = new LocalPlayerActor("player-2", new RandomJassStrategy(), store);
-		LocalPlayerActor player3 = new LocalPlayerActor("player-3", new RandomJassStrategy(), store);
-		LocalPlayerActor player4 = new LocalPlayerActor("player-4", new RandomJassStrategy(), store);
-
-
-		gameMaster.connect();
-		player1.connect();
-		player2.connect();
-		player3.connect();
-		player4.connect();
-
-		store.dispatchAction(new JassActions.StartGame());
-
-		while (!store.getCurrentState().getGameEnded()) {
-			gameMaster.dispatchAction();
-			player1.dispatchAction();
-			player2.dispatchAction();
-			player3.dispatchAction();
-			player4.dispatchAction();
-		}
-
-		gameMaster.disconnect();
-		player1.disconnect();
-		player2.disconnect();
-		player3.disconnect();
-		player4.disconnect();
-	}
+        System.out.println(result);
+    }
 }

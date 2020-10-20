@@ -17,8 +17,6 @@ public class JassRules {
         return playerOrder.get(nextPlayerIndex);
     }
 
-
-
     public static PlayedCard winningCard(GameMode.PlayingMode playingMode, List<PlayedCard> tableStack) {
         return GameMode.Builder.build(playingMode)
                 .winningCard(tableStack);
