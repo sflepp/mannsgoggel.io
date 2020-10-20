@@ -14,14 +14,14 @@ public class Store {
     private final List<Action> actions = new ArrayList<>();
     private final Subject<GameState> state = new Subject<>(null);
 
-    private GameState currentState;
+    private GameState currentState = new GameState();
 
     public void dispatchAction(Action action) {
         LOGGER.info(action.getPlayer() + " | " + action.getAction() + (action.getPayload() == null ? "" : (" | " + action.getPayload())));
 
-        currentState = action.reduce(currentState);
-        currentState.setNextAction(action.nextAction(currentState));
+        action.apply(currentState);
         state.next(currentState);
+
         actions.add(action);
     }
 

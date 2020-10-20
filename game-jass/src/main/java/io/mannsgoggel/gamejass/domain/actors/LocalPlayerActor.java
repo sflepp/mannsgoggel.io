@@ -20,8 +20,8 @@ public class LocalPlayerActor extends GameActor {
 
     @Override
     public void next(GameState state) {
-        var handCards = List.copyOf(state.getPlayerByName(name).getHandCards());
-        var tableStack = List.copyOf(state.getTableStackWithoutPlayer());
+        var handCards = List.copyOf(state.queryPlayerByName(name).getHandCards());
+        var tableStack = List.copyOf(state.getTableStack());
         var action = switch (state.getNextAction()) {
             case START_GAME             -> none();
             case START_ROUND            -> none();

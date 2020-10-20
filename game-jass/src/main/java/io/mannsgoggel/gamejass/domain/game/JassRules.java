@@ -16,4 +16,33 @@ public class JassRules {
 
         return playerOrder.get(nextPlayerIndex);
     }
+
+
+
+    public static PlayedCard winningCard(GameMode.PlayingMode playingMode, List<PlayedCard> tableStack) {
+        return GameMode.Builder.build(playingMode)
+                .winningCard(tableStack);
+    }
+
+    public static Integer tableStackPoints(GameMode.PlayingMode playingMode, List<PlayedCard> tableStack) {
+        return tableStack.stream()
+                .map(PlayedCard::getCard)
+                .mapToInt(card -> cardPoints(playingMode, card))
+                .sum();
+    }
+
+    public static Integer cardPoints(GameMode.PlayingMode playingMode, Card card) {
+        return GameMode.Builder.build(playingMode)
+                .getPoints(card);
+    }
+
+    public static List<Card> playableCards(GameMode.PlayingMode playingMode, List<Card> handCards, List<PlayedCard> tableStack) {
+        return GameMode.Builder.build(playingMode)
+                .playableCards(handCards, tableStack);
+    }
+
+    public static Card higherCard(GameMode.PlayingMode playingMode, Card a, Card b) {
+        return GameMode.Builder.build(playingMode)
+                .higherCard(a, b);
+    }
 }

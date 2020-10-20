@@ -1,30 +1,20 @@
 package io.mannsgoggel.gamejass.domain.game;
 
+import lombok.Value;
+
 import java.util.*;
 
+@Value
 public class Card {
+    Color color;
+    Suit suit;
+
     public enum Color {
         HEARTHS, SPADES, DIAMONDS, CLUBS
     }
 
     public enum Suit {
         ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX
-    }
-
-    private final Color color;
-    private final Suit suit;
-
-    public Card(Color color, Suit suit) {
-        this.color = color;
-        this.suit = suit;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public Suit getSuit() {
-        return suit;
     }
 
     public static class CardDeckBuilder {
@@ -56,13 +46,5 @@ public class Card {
 
             return cardsPerPlayer;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Card{" +
-                "color=" + color +
-                ", suit=" + suit +
-                '}';
     }
 }

@@ -11,11 +11,13 @@ public interface GameMode {
 
     Integer getPoints(Card card);
 
-    Card winningCard(List<Card> tableStack);
+    PlayedCard winningCard(List<PlayedCard> tableStack);
 
     Card higherCard(Card a, Card b);
 
-    List<Card> playableCards(List<Card> handCards, List<Card> tableStack);
+    PlayedCard higherCard(PlayedCard a, PlayedCard b);
+
+    List<Card> playableCards(List<Card> handCards, List<PlayedCard> tableStack);
 
     enum PlayingMode {
         TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
@@ -66,12 +68,12 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(List<Card> tableStack) {
-            var firstCardColor = tableStack.get(0).getColor();
+        public PlayedCard winningCard(List<PlayedCard> tableStack) {
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             return tableStack.stream()
                     .reduce((highestCard, card)
-                            -> card.getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
+                            -> card.getCard().getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));
         }
 
@@ -81,12 +83,17 @@ public interface GameMode {
         }
 
         @Override
-        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+        public PlayedCard higherCard(PlayedCard a, PlayedCard b) {
+            return getRankOrder(a.getCard()) > getRankOrder(b.getCard()) ? a : b;
+        }
+
+        @Override
+        public List<Card> playableCards(List<Card> handCards, List<PlayedCard> tableStack) {
             if (tableStack.isEmpty()) {
                 return handCards;
             }
 
-            var firstCardColor = tableStack.get(0).getColor();
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor))
@@ -128,12 +135,12 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(List<Card> tableStack) {
-            var firstCardColor = tableStack.get(0).getColor();
+        public PlayedCard winningCard(List<PlayedCard> tableStack) {
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             return tableStack.stream()
                     .reduce((highestCard, card)
-                            -> card.getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
+                            -> card.getCard().getColor() == firstCardColor ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));
         }
 
@@ -143,12 +150,17 @@ public interface GameMode {
         }
 
         @Override
-        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+        public PlayedCard higherCard(PlayedCard a, PlayedCard b) {
+            return getRankOrder(a.getCard()) > getRankOrder(b.getCard()) ? a : b;
+        }
+
+        @Override
+        public List<Card> playableCards(List<Card> handCards, List<PlayedCard> tableStack) {
             if (tableStack.isEmpty()) {
                 return handCards;
             }
 
-            var firstCardColor = tableStack.get(0).getColor();
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor))
@@ -203,16 +215,21 @@ public interface GameMode {
         }
 
         @Override
-        public List<Card> playableCards(List<Card> handCards, List<Card> tableStack) {
+        public PlayedCard higherCard(PlayedCard a, PlayedCard b) {
+            return getRankOrder(a.getCard()) > getRankOrder(b.getCard()) ? a : b;
+        }
+
+        @Override
+        public List<Card> playableCards(List<Card> handCards, List<PlayedCard> tableStack) {
             if (tableStack.isEmpty()) {
                 return List.copyOf(handCards);
             }
 
-            var firstCardColor = tableStack.get(0).getColor();
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             var validCards = handCards.stream()
                     .filter(card -> card.getColor().equals(firstCardColor)
-                            || (isTrumpCard(card) && higherCard(card, winningCard(tableStack)).equals(card)))
+                            || (isTrumpCard(card) && higherCard(card, winningCard(tableStack).getCard()).equals(card)))
                     .collect(Collectors.toList());
 
             return validCards.size() == 0
@@ -221,12 +238,12 @@ public interface GameMode {
         }
 
         @Override
-        public Card winningCard(List<Card> tableStack) {
-            var firstCardColor = tableStack.get(0).getColor();
+        public PlayedCard winningCard(List<PlayedCard> tableStack) {
+            var firstCardColor = tableStack.get(0).getCard().getColor();
 
             return tableStack.stream()
                     .reduce((highestCard, card)
-                            -> card.getColor() == firstCardColor || isTrumpCard(card) ? higherCard(highestCard, card) : highestCard)
+                            -> card.getCard().getColor() == firstCardColor || isTrumpCard(card.getCard()) ? higherCard(highestCard, card) : highestCard)
                     .orElseThrow(() -> new RuntimeException("No cards in stack"));
 
         }

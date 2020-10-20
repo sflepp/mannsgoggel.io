@@ -10,9 +10,7 @@ public interface Action<T> {
 
     T getPayload();
 
-    GameState reduce(GameState state);
-
-    JassActions.ActionType nextAction(GameState state);
+    void apply(GameState state);
 
     abstract class BaseAction<T> implements Action<T> {
         private final JassActions.ActionType action;

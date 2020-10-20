@@ -2,15 +2,14 @@ package io.mannsgoggel.gamejass.domain.game;
 
 import io.mannsgoggel.gamejass.domain.action.Action;
 import io.mannsgoggel.gamejass.domain.action.InvalidAction;
-import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
+import static io.mannsgoggel.gamejass.domain.game.JassRules.*;
 
 public class JassActions {
     public enum ActionType {
@@ -33,20 +32,13 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
-            return new GameState(
-                    START_ROUND,
-                    "game-master",
-                    List.of(
-                            new Team(List.of(new Player("player-1"), new Player("player-2"))),
-                            new Team(List.of(new Player("player-3"), new Player("player-4")))
-                    )
-            );
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return START_ROUND;
+        public void apply(GameState state) {
+            state.setTeams(List.of(
+                    new Team(List.of(new Player("player-1"), new Player("player-2"))),
+                    new Team(List.of(new Player("player-3"), new Player("player-4")))
+            ));
+            state.setNextPlayer("game-master");
+            state.setNextAction(START_ROUND);
         }
     }
 
@@ -56,14 +48,9 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             state.setNextPlayer("game-master");
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return HAND_OUT_CARDS;
+            state.setNextAction(HAND_OUT_CARDS);
         }
     }
 
@@ -73,18 +60,10 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
-
-            getPayload().forEach((key, value) -> state.getPlayerByName(key).setHandCards(value));
-
+        public void apply(GameState state) {
+            getPayload().forEach((key, value) -> state.queryPlayerByName(key).setHandCards(value));
             state.setNextPlayer("game-master");
-
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return SET_STARTING_PLAYER;
+            state.setNextAction(SET_STARTING_PLAYER);
         }
     }
 
@@ -94,14 +73,9 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             state.setNextPlayer(getPayload());
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return DECIDE_SHIFT;
+            state.setNextAction(DECIDE_SHIFT);
         }
     }
 
@@ -111,23 +85,18 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             var shift = getPayload();
 
             state.setShifted(shift);
 
             if (shift) {
-                var teamMate = state.getTeamMateFor(state.getNextPlayer());
+                var teamMate = state.queryTeamMateFor(state.getNextPlayer());
 
                 state.setNextPlayer(teamMate.getName());
             }
 
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return SET_PLAYING_MODE;
+            state.setNextAction(SET_PLAYING_MODE);
         }
     }
 
@@ -137,23 +106,18 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             var playingMode = getPayload();
 
-            state.setGameMode(GameMode.Builder.build(playingMode));
+            state.setPlayingMode(playingMode);
 
-            if (state.isShifted()) {
-                var teamMate = state.getTeamMateFor(state.getNextPlayer());
+            if (state.getShifted()) {
+                var teamMate = state.queryTeamMateFor(state.getNextPlayer());
 
                 state.setNextPlayer(teamMate.getName());
             }
 
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return START_STICH;
+            state.setNextAction(START_STICH);
         }
     }
 
@@ -167,36 +131,27 @@ public class JassActions {
         public PlayCard(ActionType action, String player, Card payload) {
             super(action, player, payload);
         }
+
         public PlayCard(String player, Card payload) {
             super(PLAY_CARD, player, payload);
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             var card = getPayload();
-            var tableStack = state.getTableStackWithoutPlayer();
-            var player = state.getPlayerByName(getPlayer());
+            var mode = state.getPlayingMode();
+            var tableStack = state.getTableStack();
+            var player = state.queryPlayerByName(getPlayer());
             var playerCards = player.getHandCards();
 
-            if (!state.getGameMode().playableCards(playerCards, tableStack).contains(card)) {
+            if (!playableCards(mode, playerCards, tableStack).contains(card)) {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
             }
 
-            state.getPlayerByName(getPlayer()).removeHandCard(card);
-            state.getTableStack().add(Pair.with(getPlayer(), card));
-
-            if (state.isStichFinished()) {
-                state.setNextPlayer("game-master");
-            } else {
-                state.setNextPlayer(JassRules.nextPlayer(player, state.getTeams()).getName());
-            }
-
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return state.isStichFinished() ? END_STICH : PLAY_CARD;
+            state.queryPlayerByName(getPlayer()).removeHandCard(card);
+            state.getTableStack().add(new PlayedCard(getPlayer(), card));
+            state.setNextPlayer(state.isStichFinished() ? "game-master" : nextPlayer(player, state.getTeams()).getName());
+            state.setNextAction(state.isStichFinished() ? END_STICH : PLAY_CARD);
         }
     }
 
@@ -209,35 +164,18 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
+            var playingMode = state.getPlayingMode();
+            var tableStack = state.getTableStack();
+            var winningCard = winningCard(playingMode, tableStack);
+            var winningTeam = state.queryTeamWith(winningCard.getPlayer());
+            var points = tableStackPoints(playingMode, tableStack) + (state.isRoundFinished() ? 5 : 0);
 
-            var winningCard = state.getGameMode().winningCard(state.getTableStackWithoutPlayer());
-            var winningPlayer = state.getPlayerNameForPlayedCard(winningCard);
-            var winningTeam = state.getTeamWith(winningPlayer);
-            var points = state.getTableStackWithoutPlayer().stream()
-                    .mapToInt(card -> state.getGameMode().getPoints(card))
-                    .sum();
-
-            LOGGER.info(winningPlayer + " wins with " + winningCard);
-
-            winningTeam.obtainCards(state.getTableStack());
+            winningTeam.getObtainedCards().addAll(tableStack);
             winningTeam.addPoints(points);
-            state.setTableStack(new ArrayList<>());
-
-            if (state.isRoundFinished()) {
-                winningTeam.addPoints(5);
-
-                state.setNextPlayer("game-master");
-            } else {
-                state.setNextPlayer(winningPlayer);
-            }
-
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return state.isRoundFinished() ? END_ROUND : START_STICH;
+            tableStack.clear();
+            state.setNextPlayer(state.isRoundFinished() ? "game-master" : winningCard.getPlayer());
+            state.setNextAction(state.isRoundFinished() ? END_ROUND : START_STICH);
         }
     }
 
@@ -247,13 +185,10 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return state.getTeams().stream().anyMatch(team -> team.getPoints() >= 1500) ? END_GAME : START_ROUND;
+        public void apply(GameState state) {
+            state.setNextAction(
+                    state.getTeams().stream().anyMatch(team -> team.getPoints() >= 1500) ? END_GAME : START_ROUND
+            );
         }
     }
 
@@ -263,14 +198,8 @@ public class JassActions {
         }
 
         @Override
-        public GameState reduce(GameState state) {
+        public void apply(GameState state) {
             state.setGameEnded(true);
-            return state;
-        }
-
-        @Override
-        public ActionType nextAction(GameState state) {
-            return END_GAME;
         }
     }
 }

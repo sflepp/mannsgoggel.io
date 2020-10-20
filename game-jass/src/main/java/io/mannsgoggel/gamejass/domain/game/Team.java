@@ -1,35 +1,17 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import org.javatuples.Pair;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+@Data
+@RequiredArgsConstructor
 public class Team {
-    private List<Player> players;
-    private List<Pair<String, Card>> obtainedCards = new ArrayList<>();
+    private final List<Player> players;
+    private final List<PlayedCard> obtainedCards = new ArrayList<>();
     private Integer points = 0;
-
-    public Team(List<Player> players) {
-        this.players = players;
-    }
-
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-    public List<Pair<String, Card>> getObtainedCards() {
-        return obtainedCards;
-    }
-
-    public Integer getPoints() {
-        return points;
-    }
-
-    public void setPoints(Integer points) {
-        this.points = points;
-    }
 
     public void addPoints(Integer points) {
         this.points += points;
@@ -45,9 +27,5 @@ public class Team {
                 .filter(player -> !player.getName().equals(playerName))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player " + playerName + " not found in team"));
-    }
-
-    public void obtainCards(Collection<Pair<String, Card>> cards) {
-        obtainedCards.addAll(cards);
     }
 }

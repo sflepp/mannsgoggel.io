@@ -16,7 +16,7 @@ public class LocalGameMasterActor extends GameActor {
 
     @Override
     public void next(GameState state) {
-        var players = state.getPlayers();
+        var players = state.queryPlayers();
         var nextAction = switch (state.getNextAction()) {
             case START_GAME             -> none();
             case START_ROUND            -> with(new StartRound(NAME));
