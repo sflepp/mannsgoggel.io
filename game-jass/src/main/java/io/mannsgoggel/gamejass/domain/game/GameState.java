@@ -9,14 +9,24 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 public class GameState {
-    private ActionHistory history = new ActionHistory();
+    private ActionHistory history;
     private JassActions.ActionType nextAction;
     private String nextPlayer;
     private GameMode.PlayingMode playingMode;
-    private Boolean shifted = false;
-    private Boolean gameEnded = false;
-    private List<Team> teams = new ArrayList<>();
-    private List<PlayedCard> tableStack = new ArrayList<>();
+    private Boolean shifted;
+    private Boolean gameEnded;
+    private List<Team> teams;
+    private List<PlayedCard> tableStack;
+
+    public GameState() {
+        this.nextAction = JassActions.ActionType.START_GAME;
+        this.nextPlayer = "game-master";
+        this.shifted = false;
+        this.gameEnded = false;
+        this.history = new ActionHistory();
+        this.teams = new ArrayList<>();
+        this.tableStack = new ArrayList<>();
+    }
 
     public boolean isStichFinished() {
         return tableStack.size() == 4;

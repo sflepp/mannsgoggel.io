@@ -23,7 +23,7 @@ public class GameStateHandler {
         if(!action.getPlayer().equals(stateSubject.getState().getNextPlayer())) {
             throw new ActionNotAllowed(
                     "Expected next player " + stateSubject.getState().getNextPlayer() + " but got " + action.getPlayer()
-            )
+            );
         }
 
         action.apply(stateSubject.getState());

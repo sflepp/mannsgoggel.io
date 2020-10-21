@@ -28,7 +28,7 @@ public class JassActions {
 
     public static class StartGame extends Action.BaseAction<Void> {
         public StartGame() {
-            super(START_GAME, null, null);
+            super(START_GAME, "game-master", null);
         }
 
         @Override
