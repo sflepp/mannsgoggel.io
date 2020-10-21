@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 @Data
 @RequiredArgsConstructor
 public class Team {
     private final List<Player> players;
-    private final List<PlayedCard> obtainedCards = new ArrayList<>();
+    private final List<PlayedCard> cardStack = new ArrayList<>();
     private Integer points = 0;
 
     public void addPoints(Integer points) {
@@ -27,5 +29,11 @@ public class Team {
                 .filter(player -> !player.getName().equals(playerName))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player " + playerName + " not found in team"));
+    }
+
+    public Team toPlayerView(String playerName) {
+        return new Team(players.stream()
+                .map(player -> player.toPlayerView(playerName))
+                .collect(toUnmodifiableList()));
     }
 }

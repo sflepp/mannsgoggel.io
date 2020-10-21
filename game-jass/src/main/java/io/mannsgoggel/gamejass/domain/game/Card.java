@@ -10,11 +10,11 @@ public class Card {
     Suit suit;
 
     public enum Color {
-        HEARTHS, SPADES, DIAMONDS, CLUBS
+        HEARTHS, SPADES, DIAMONDS, CLUBS, HIDDEN
     }
 
     public enum Suit {
-        ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX
+        ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX, HIDDEN
     }
 
     public PlayedCard play(String player) {
@@ -25,12 +25,16 @@ public class Card {
         return new PlayedCard("", this);
     }
 
+    public Card hide() {
+        return new Card(Color.HIDDEN, Suit.HIDDEN);
+    }
+
     public static class CardDeckBuilder {
         public static List<Card> build() {
             List<Card> cards = new ArrayList<>();
 
-            List.of(Card.Color.values()).forEach(color -> {
-                Set.of(Card.Suit.values()).forEach(suit -> {
+            List.of(Card.Color.values()).stream().filter(v -> !v.equals(Color.HIDDEN)).forEach(color -> {
+                Set.of(Card.Suit.values()).stream().filter(v -> !v.equals(Suit.HIDDEN)).forEach(suit -> {
                     cards.add(new Card(color, suit));
                 });
             });

@@ -6,6 +6,10 @@ import lombok.Data;
 
 public interface Action<T> {
     JassActions.ActionType getAction();
+    Action<T> toPlayerView(String player);
+    String getPlayer();
+    T getPayload();
+
     void apply(GameState state);
 
     @Data
@@ -18,6 +22,11 @@ public interface Action<T> {
             this.action = action;
             this.player = player;
             this.payload = payload;
+        }
+
+        @Override
+        public Action<T> toPlayerView(String player) {
+            return this;
         }
     }
 }

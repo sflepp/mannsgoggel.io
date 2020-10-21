@@ -1,6 +1,5 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import io.mannsgoggel.gamejass.domain.action.Action;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -10,16 +9,13 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 public class GameState {
-    private List<Action> actionHistory = new ArrayList<>();
+    private ActionHistory history = new ActionHistory();
     private JassActions.ActionType nextAction;
     private String nextPlayer;
-
     private GameMode.PlayingMode playingMode;
-    private Boolean shifted;
+    private Boolean shifted = false;
     private Boolean gameEnded = false;
-
-    private List<Team> teams;
-
+    private List<Team> teams = new ArrayList<>();
     private List<PlayedCard> tableStack = new ArrayList<>();
 
     public boolean isStichFinished() {
@@ -61,5 +57,20 @@ public class GameState {
                                 .anyMatch(player -> player.getName().equals(playerName)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
+    }
+
+    public GameState toPlayerView(String player) {
+        GameState state = new GameState();
+        state.setNextPlayer(nextPlayer);
+        state.setTeams(getTeams().stream()
+                .map(team -> team.toPlayerView(player))
+                .collect(toList())
+        );
+        state.setNextAction(nextAction);
+        state.setGameEnded(gameEnded);
+        state.setPlayingMode(playingMode);
+        state.setShifted(shifted);
+        state.setHistory(history.toPlayerView(player));
+        return state;
     }
 }

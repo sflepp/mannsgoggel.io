@@ -24,9 +24,9 @@ public class JassGame {
     }
 
     public GameState playUntil(JassActions.ActionType actionType) {
-        var actionHistory = gameStateHandler.getState().getActionHistory();
+        var actionHistory = gameStateHandler.getState().getHistory();
 
-        while (!actionHistory.get(actionHistory.size() - 1).getAction().equals(actionType)) {
+        while (!actionHistory.getLast().getAction().equals(actionType)) {
             gameMaster.dispatchAction();
             players.forEach(GameActor::dispatchAction);
         }

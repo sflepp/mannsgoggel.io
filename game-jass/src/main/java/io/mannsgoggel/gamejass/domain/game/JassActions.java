@@ -5,9 +5,11 @@ import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
 import static io.mannsgoggel.gamejass.domain.game.JassRules.*;
+import static java.util.stream.Collectors.toMap;
 
 public class JassActions {
     public enum ActionType {
@@ -62,6 +64,22 @@ public class JassActions {
             getPayload().forEach((key, value) -> state.queryPlayerByName(key).setHandCards(value));
             state.setNextPlayer("game-master");
             state.setNextAction(SET_STARTING_PLAYER);
+        }
+
+        @Override
+        public Action<Map<String, List<Card>>> toPlayerView(String player) {
+            return new HandOutCards(player,
+                    getPayload().entrySet().stream()
+                            .map(entry ->
+                                    entry.getKey().equals(player) ? entry : Map.entry(
+                                            entry.getKey(),
+                                            entry.getValue().stream()
+                                                    .map(Card::hide)
+                                                    .collect(Collectors.toList())
+                                    )
+                            )
+                            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
         }
     }
 
@@ -167,7 +185,7 @@ public class JassActions {
             var winningTeam = state.queryTeamWith(winningCard.getPlayer());
             var points = tableStackPoints(playingMode, tableStack) + (state.isRoundFinished() ? 5 : 0);
 
-            winningTeam.getObtainedCards().addAll(tableStack);
+            winningTeam.getCardStack().addAll(tableStack);
             winningTeam.addPoints(points);
             tableStack.clear();
             state.setNextPlayer(state.isRoundFinished() ? "game-master" : winningCard.getPlayer());
