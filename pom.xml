@@ -13,8 +13,8 @@
     </properties>
 
     <modules>
-        <module>game-chess</module>
         <module>game-jass</module>
+        <module>tournament-server</module>
     </modules>
 
 </project>

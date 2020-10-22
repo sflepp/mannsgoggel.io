@@ -14,10 +14,11 @@ public class LocalGameMasterActor extends GameActor {
     public void next(GameState state) {
         var players = state.queryPlayers();
         var nextAction = switch (state.getNextAction()) {
-            case START_GAME             -> none();
+            case JOIN_PLAYER            -> none();
+            case START_GAME             -> with(new StartGame(getName()));
             case START_ROUND            -> with(new StartRound(getName()));
-            case HAND_OUT_CARDS         -> with(new HandOutCards(getName(), Card.CardDeckBuilder.buildAndShuffleFor(players)));
-            case SET_STARTING_PLAYER    -> with(new SetStartingPlayer(getName(), players.get(0).getName()));
+            case HAND_OUT_CARDS         -> with(new HandOutCards(getName(), Card.CardDeckBuilder.buildAndShuffle(players)));
+            case SET_STARTING_PLAYER    -> with(new SetStartingPlayer(getName(), players.get(0)));
             case DECIDE_SHIFT           -> none();
             case SET_PLAYING_MODE       -> none();
             case START_STICH            -> none();

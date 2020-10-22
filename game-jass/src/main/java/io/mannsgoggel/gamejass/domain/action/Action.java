@@ -5,17 +5,17 @@ import io.mannsgoggel.gamejass.domain.game.JassActions;
 import lombok.Data;
 
 public interface Action<T> {
-    JassActions.ActionType getAction();
-    Action<T> toPlayerView(String player);
     String getPlayer();
+    JassActions.ActionType getAction();
     T getPayload();
+    Action<T> toPlayerView(String player);
 
     void apply(GameState state);
 
     @Data
     abstract class BaseAction<T> implements Action<T> {
-        JassActions.ActionType action;
         String player;
+        JassActions.ActionType action;
         T payload;
 
         public BaseAction(JassActions.ActionType action, String player, T payload) {

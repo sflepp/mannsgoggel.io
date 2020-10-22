@@ -1,39 +1,26 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
-@Data
-@RequiredArgsConstructor
+@Value
+@Builder(toBuilder = true)
 public class Team {
-    private final List<Player> players;
-    private final List<PlayedCard> cardStack = new ArrayList<>();
-    private Integer points = 0;
-
-    public void addPoints(Integer points) {
-        this.points += points;
-    }
+    String name;
+    List<String> players;
+    Integer points;
 
     public boolean containsPlayer(String playerName) {
         return players.stream()
-                .anyMatch(player -> player.getName().equals(playerName));
+                .anyMatch(player -> player.equals(playerName));
     }
 
-    public Player getTeamMate(String playerName) {
+    public String getTeamMate(String playerName) {
         return players.stream()
-                .filter(player -> !player.getName().equals(playerName))
+                .filter(player -> !player.equals(playerName))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player " + playerName + " not found in team"));
-    }
-
-    public Team toPlayerView(String playerName) {
-        return new Team(players.stream()
-                .map(player -> player.toPlayerView(playerName))
-                .collect(toUnmodifiableList()));
     }
 }

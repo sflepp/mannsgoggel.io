@@ -9,33 +9,37 @@ import java.util.List;
 public class JassGame {
     private final GameActor gameMaster;
     private final List<GameActor> players;
-    private GameStateHandler gameStateHandler;
+    private final GameStateHandler gameStateHandler = new GameStateHandler();
 
     public void start() {
-        gameStateHandler = new GameStateHandler();
-
         gameMaster.setGameStateHandler(gameStateHandler);
         players.forEach(player -> player.setGameStateHandler(gameStateHandler));
 
         gameMaster.connect();
         players.forEach(GameActor::connect);
 
-        gameStateHandler.dispatchAction(new JassActions.StartGame());
+        players.forEach(player -> gameStateHandler.dispatchAction(
+                new JassActions.JoinPlayer(player.getName())
+        ));
     }
 
     public GameState playUntil(JassActions.ActionType actionType) {
         var actionHistory = gameStateHandler.getState().getHistory();
 
         while (!actionHistory.getLast().getAction().equals(actionType)) {
-            gameMaster.dispatchAction();
-            players.forEach(GameActor::dispatchAction);
+            dispatchAllPlayers();
         }
 
         return gameStateHandler.getState();
     }
 
+    public void dispatchAllPlayers() {
+        gameMaster.dispatchAction();
+        players.forEach(GameActor::dispatchAction);
+    }
+
     public GameResult play() {
-        while (!gameStateHandler.getState().getGameEnded()) {
+        while (!gameStateHandler.getState().queryGameEnded()) {
             gameMaster.dispatchAction();
             players.forEach(GameActor::dispatchAction);
         }

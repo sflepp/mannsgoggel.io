@@ -3,16 +3,14 @@ package io.mannsgoggel.gamejass.domain.game;
 import io.mannsgoggel.gamejass.domain.action.Action;
 import io.mannsgoggel.gamejass.domain.action.InvalidAction;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import static io.mannsgoggel.gamejass.domain.game.JassActions.ActionType.*;
 import static io.mannsgoggel.gamejass.domain.game.JassRules.*;
-import static java.util.stream.Collectors.toMap;
 
 public class JassActions {
     public enum ActionType {
+        JOIN_PLAYER,
         START_GAME,
         START_ROUND,
         HAND_OUT_CARDS,
@@ -26,17 +24,36 @@ public class JassActions {
         END_GAME
     }
 
-    public static class StartGame extends Action.BaseAction<Void> {
-        public StartGame() {
-            super(START_GAME, "game-master", null);
+    public static class JoinPlayer extends Action.BaseAction<String> {
+        public JoinPlayer(String payload) {
+            super(JOIN_PLAYER, "any", payload);
         }
 
         @Override
         public void apply(GameState state) {
-            state.setTeams(List.of(
-                    new Team(List.of(new Player("player-1"), new Player("player-2"))),
-                    new Team(List.of(new Player("player-3"), new Player("player-4")))
-            ));
+            var amountOfPlayers = state.queryPlayers().size();
+            var teamNumber = amountOfPlayers / 2;
+
+            if (amountOfPlayers % 2 == 0) {
+                state.getTeams().add(new Team("team" + teamNumber, new ArrayList<>(), 0));
+            }
+
+            state.getTeams().get(teamNumber).getPlayers().add(getPayload());
+
+            var full = state.queryPlayers().size() == 4;
+
+            state.setNextAction(full ? START_GAME : JOIN_PLAYER);
+            state.setNextPlayer(full ? "game-master" : "any");
+        }
+    }
+
+    public static class StartGame extends Action.BaseAction<Void> {
+        public StartGame(String player) {
+            super(START_GAME, player, null);
+        }
+
+        @Override
+        public void apply(GameState state) {
             state.setNextPlayer("game-master");
             state.setNextAction(START_ROUND);
         }
@@ -54,32 +71,21 @@ public class JassActions {
         }
     }
 
-    public static class HandOutCards extends Action.BaseAction<Map<String, List<Card>>> {
-        public HandOutCards(String player, Map<String, List<Card>> payload) {
+    public static class HandOutCards extends Action.BaseAction<CardHandout> {
+        public HandOutCards(String player, CardHandout payload) {
             super(HAND_OUT_CARDS, player, payload);
         }
 
         @Override
         public void apply(GameState state) {
-            getPayload().forEach((key, value) -> state.queryPlayerByName(key).setHandCards(value));
+            state.setCards(getPayload().getCards());
             state.setNextPlayer("game-master");
             state.setNextAction(SET_STARTING_PLAYER);
         }
 
         @Override
-        public Action<Map<String, List<Card>>> toPlayerView(String player) {
-            return new HandOutCards(player,
-                    getPayload().entrySet().stream()
-                            .map(entry ->
-                                    entry.getKey().equals(player) ? entry : Map.entry(
-                                            entry.getKey(),
-                                            entry.getValue().stream()
-                                                    .map(Card::hide)
-                                                    .collect(Collectors.toList())
-                                    )
-                            )
-                            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+        public Action<CardHandout> toPlayerView(String player) {
+            return new HandOutCards(player, getPayload().toPlayerView(player));
         }
     }
 
@@ -109,7 +115,7 @@ public class JassActions {
             if (shift) {
                 var teamMate = state.queryTeamMateFor(state.getNextPlayer());
 
-                state.setNextPlayer(teamMate.getName());
+                state.setNextPlayer(teamMate);
             }
 
             state.setNextAction(SET_PLAYING_MODE);
@@ -130,7 +136,7 @@ public class JassActions {
             if (state.getShifted()) {
                 var teamMate = state.queryTeamMateFor(state.getNextPlayer());
 
-                state.setNextPlayer(teamMate.getName());
+                state.setNextPlayer(teamMate);
             }
 
             state.setNextAction(START_STICH);
@@ -156,18 +162,22 @@ public class JassActions {
         public void apply(GameState state) {
             var card = getPayload();
             var mode = state.getPlayingMode();
-            var tableStack = state.getTableStack();
+            var tableStack = state.queryTableStackCards();
             var player = state.queryPlayerByName(getPlayer());
-            var playerCards = player.getHandCards();
+            var playerCards = state.queryPlayerCards(getPlayer());
 
             if (!playableCards(mode, playerCards, tableStack).contains(card)) {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
             }
 
-            state.queryPlayerByName(getPlayer()).removeHandCard(card);
-            state.getTableStack().add(card.play(getPlayer()));
-            state.setNextPlayer(state.isStichFinished() ? "game-master" : nextPlayer(player, state.getTeams()).getName());
-            state.setNextAction(state.isStichFinished() ? END_STICH : PLAY_CARD);
+            state.transformCardState(
+                    cardState -> cardState.getCard().equals(card) ?
+                            cardState.play(state.queryTableStack().size()) :
+                            cardState
+            );
+
+            state.setNextPlayer(state.queryStichFinished() ? "game-master" : nextPlayer(player, state.getTeams()));
+            state.setNextAction(state.queryStichFinished() ? END_STICH : PLAY_CARD);
         }
     }
 
@@ -180,16 +190,26 @@ public class JassActions {
         @Override
         public void apply(GameState state) {
             var playingMode = state.getPlayingMode();
-            var tableStack = state.getTableStack();
+            var tableStack = state.queryTableStackCards();
             var winningCard = winningCard(playingMode, tableStack);
-            var winningTeam = state.queryTeamWith(winningCard.getPlayer());
-            var points = tableStackPoints(playingMode, tableStack) + (state.isRoundFinished() ? 5 : 0);
+            var winningCardState = state.queryCardState(winningCard);
+            var winningTeam = state.queryTeamWith(winningCardState.getPlayer());
+            var points = tableStackPoints(playingMode, tableStack) + (state.queryRoundFinished() ? 5 : 0);
 
-            winningTeam.getCardStack().addAll(tableStack);
-            winningTeam.addPoints(points);
-            tableStack.clear();
-            state.setNextPlayer(state.isRoundFinished() ? "game-master" : winningCard.getPlayer());
-            state.setNextAction(state.isRoundFinished() ? END_ROUND : START_STICH);
+            state.transformCardState(
+                    cardState -> cardState.queryIsOnTable() ?
+                            cardState.moveToTeam(winningTeam.getName()) :
+                            cardState
+            );
+
+            state.transformTeam(
+                    team -> team.equals(winningTeam) ?
+                            team.toBuilder().points(team.getPoints() + points).build() :
+                            team
+            );
+
+            state.setNextPlayer(state.queryRoundFinished() ? "game-master" : winningCardState.getPlayer());
+            state.setNextAction(state.queryRoundFinished() ? END_ROUND : START_STICH);
         }
     }
 
@@ -212,8 +232,6 @@ public class JassActions {
         }
 
         @Override
-        public void apply(GameState state) {
-            state.setGameEnded(true);
-        }
+        public void apply(GameState state) { }
     }
 }

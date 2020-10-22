@@ -31,15 +31,15 @@ class GameModeTest {
         var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
 
         var tableStack = List.of(
-                card1.play(),
-                card2.play(),
-                card3.play(),
-                card4.play()
+                card1,
+                card2,
+                card3,
+                card4
         );
 
         var winningCard = testee.winningCard(tableStack);
 
-        assertThat(winningCard, equalTo(card3.play("")));
+        assertThat(winningCard, equalTo(card3));
     }
 
     @Test
@@ -52,15 +52,15 @@ class GameModeTest {
         var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
 
         var tableStack = List.of(
-                card1.play(),
-                card2.play(),
-                card3.play(),
-                card4.play()
+                card1,
+                card2,
+                card3,
+                card4
         );
 
         var winningCard = testee.winningCard(tableStack);
 
-        assertThat(winningCard, equalTo(card4.play("")));
+        assertThat(winningCard, equalTo(card4));
     }
 
     @Test
@@ -73,15 +73,15 @@ class GameModeTest {
         var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
 
         var tableStack = List.of(
-                card1.play(),
-                card2.play(),
-                card3.play(),
-                card4.play()
+                card1,
+                card2,
+                card3,
+                card4
         );
 
         var winningCard = testee.winningCard(tableStack);
 
-        assertThat(winningCard, equalTo(card4.play("")));
+        assertThat(winningCard, equalTo(card4));
     }
 
     @Test
@@ -94,15 +94,15 @@ class GameModeTest {
         var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
 
         var tableStack = List.of(
-                card1.play(),
-                card2.play(),
-                card3.play(),
-                card4.play()
+                card1,
+                card2,
+                card3,
+                card4
         );
 
         var winningCard = testee.winningCard(tableStack);
 
-        assertThat(winningCard, equalTo(card2.play("")));
+        assertThat(winningCard, equalTo(card2));
     }
 
     @Test
@@ -115,14 +115,14 @@ class GameModeTest {
         var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
 
         var tableStack = List.of(
-                card1.play(),
-                card2.play(),
-                card3.play(),
-                card4.play()
+                card1,
+                card2,
+                card3,
+                card4
         );
 
         var winningCard = testee.winningCard(tableStack);
 
-        assertThat(winningCard, equalTo(card3.play()));
+        assertThat(winningCard, equalTo(card3));
     }
 }

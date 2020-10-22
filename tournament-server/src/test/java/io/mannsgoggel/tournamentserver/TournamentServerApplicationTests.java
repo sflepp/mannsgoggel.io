@@ -1,10 +1,10 @@
-package io.mannsgoggel.gamechess;
+package io.mannsgoggel.tournamentserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GameChessApplicationTests {
+class TournamentServerApplicationTests {
 
 	@Test
 	void contextLoads() {

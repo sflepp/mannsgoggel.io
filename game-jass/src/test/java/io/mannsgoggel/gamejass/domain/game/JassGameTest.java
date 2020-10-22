@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.equalTo;
 class JassGameTest {
 
     @Test
-    public void testJassGame_untilEndOfFirstStich() {
+    public void testJassGame_untilEndOfFirstRound() {
         JassGame testee = new JassGame(
                 new LocalGameMasterActor(),
                 List.of(

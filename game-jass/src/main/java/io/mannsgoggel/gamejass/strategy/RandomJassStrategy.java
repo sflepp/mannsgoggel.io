@@ -23,7 +23,7 @@ public class RandomJassStrategy implements PlayerStrategy {
     }
 
     @Override
-    public Card playCard(List<Card> handCards, List<PlayedCard> tableStack, GameState state) {
+    public Card playCard(List<Card> handCards, List<Card> tableStack, GameState state) {
         var playableCards = JassRules.playableCards(state.getPlayingMode(), handCards, tableStack);
         return playableCards.get(new Random().nextInt(playableCards.size()));
     }
