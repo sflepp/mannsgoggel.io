@@ -11,6 +11,7 @@ import java.util.List;
 public class RequestRemoteAction {
     final JassActions.ActionType action;
     final List<Card> handCards;
+    final List<Card> playableCards;
     final List<Card> tableStack;
     final GameState gameState;
 }

@@ -1,12 +1,16 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Card {
     Color color;
     Suit suit;

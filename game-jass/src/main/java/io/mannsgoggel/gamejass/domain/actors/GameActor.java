@@ -37,6 +37,7 @@ public abstract class GameActor implements Observer<GameState> {
 
     public void dispatchAction() {
         if (nextAction.isPresent()) {
+            System.out.println("next action");
             var next = nextAction;
             nextAction = Optional.empty();
             gameStateHandler.dispatchAction(next.get());

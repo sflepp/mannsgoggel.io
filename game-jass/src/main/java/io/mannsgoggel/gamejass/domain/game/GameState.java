@@ -116,7 +116,7 @@ public class GameState {
                 .orElseThrow();
     }
 
-    public List<Card> queryPlayerCards(String player) {
+    public List<Card> queryHandCards(String player) {
         return cards.stream()
                 .filter(cardState -> cardState.queryIsOnPlayer() && cardState.getPlayer().equals(player))
                 .map(CardState::getCard)

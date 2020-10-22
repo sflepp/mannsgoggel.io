@@ -10,5 +10,5 @@ public interface PlayerStrategy {
     Boolean decideShift(List<Card> handCards, GameState state);
     GameMode.PlayingMode choosePlayingMode(List<Card> handCards, GameState state);
     Card startStich(List<Card> handCards, GameState state);
-    Card playCard(List<Card> handCards, List<Card> tableStack, GameState state);
+    Card playCard(List<Card> handCards, List<Card> playableCards, List<Card> tableStack, GameState state);
 }

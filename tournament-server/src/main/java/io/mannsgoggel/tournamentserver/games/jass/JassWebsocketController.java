@@ -1,6 +1,25 @@
 package io.mannsgoggel.tournamentserver.games.jass;
 
-/* @Service
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.mannsgoggel.gamejass.domain.actors.LocalGameMasterActor;
+import io.mannsgoggel.gamejass.domain.actors.LocalPlayerActor;
+import io.mannsgoggel.gamejass.domain.game.JassGame;
+import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
+import io.mannsgoggel.tournamentserver.games.jass.clients.RemotePlayerActor;
+import io.mannsgoggel.tournamentserver.games.jass.dto.HelloMessage;
+import io.mannsgoggel.tournamentserver.games.jass.dto.RemoteAction;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.UUID;
+
+@Controller
+@EnableScheduling
 public class JassWebsocketController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -8,12 +27,12 @@ public class JassWebsocketController {
     private JassGame jassGame;
     private RemotePlayerActor player;
 
-    public JassWebsocketController(SimpMessagingTemplate simpMessagingTemplate, SimpMessageSendingOperations messagingTemplate) {
+    public JassWebsocketController(SimpMessagingTemplate simpMessagingTemplate) {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/games/new-game")
-    public void newGame(String message, Principal principal) {
+    @MessageMapping("/jass/new-game")
+    public void greeting(Principal principal, HelloMessage message) {
         System.out.println(message + " " + principal.toString());
 
         player = new RemotePlayerActor(principal.getName(), simpMessagingTemplate);
@@ -21,35 +40,26 @@ public class JassWebsocketController {
         jassGame = new JassGame(
                 new LocalGameMasterActor(),
                 List.of(
-                        player,
-                        new LocalPlayerActor("player-2", new RandomJassStrategy()),
-                        new LocalPlayerActor("player-3", new RandomJassStrategy()),
-                        new LocalPlayerActor("player-4", new RandomJassStrategy())
+                        new LocalPlayerActor(UUID.randomUUID().toString(), new RandomJassStrategy()),
+                        new LocalPlayerActor(UUID.randomUUID().toString(), new RandomJassStrategy()),
+                        new LocalPlayerActor(UUID.randomUUID().toString(), new RandomJassStrategy()),
+                        player
                 )
         );
+
         jassGame.start();
     }
 
-    @MessageMapping("/games/action")
-    public void onAction(RemoteAction action) {
-        try {
-            player.next(action);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+    @MessageMapping("/jass/action")
+    public void action(Principal principal, RemoteAction action) throws JsonProcessingException {
+        player.next(action);
     }
 
-    @Scheduled(fixedDelay = 500)
+    @Scheduled(fixedDelay = 100)
     public void scheduled() {
         if (jassGame != null) {
             jassGame.dispatchAllPlayers();
         }
     }
 
-    @MessageMapping("/hello")
-    @SendToUser("/topic/greetings") // use @SendToUser instead of @SendTo
-    public String greeting(String message, Principal principal) throws Exception {
-        System.out.println("worked");
-        return "testasfd";
-    }
-} */
+}

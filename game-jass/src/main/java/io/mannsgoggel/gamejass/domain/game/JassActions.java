@@ -164,7 +164,7 @@ public class JassActions {
             var mode = state.getPlayingMode();
             var tableStack = state.queryTableStackCards();
             var player = state.queryPlayerByName(getPlayer());
-            var playerCards = state.queryPlayerCards(getPlayer());
+            var playerCards = state.queryHandCards(getPlayer());
 
             if (!playableCards(mode, playerCards, tableStack).contains(card)) {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
