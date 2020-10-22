@@ -10,11 +10,11 @@ import lombok.Data;
 public class CardState {
     Card card;
     String player;
-    Integer played;
+    Integer tableOrder;
     String team;
 
     public CardState toPlayerView(String player) {
-        if(this.player == null || this.played != null || this.player.equals(player))  {
+        if (this.player == null || this.tableOrder != null || this.player.equals(player)) {
             return this;
         } else {
             return toBuilder().player("").build();
@@ -22,15 +22,15 @@ public class CardState {
     }
 
     public boolean queryIsOnPlayer() {
-        return played == null && team == null;
+        return tableOrder == null && team == null;
     }
 
     public CardState play(Integer index) {
-        return this.toBuilder().played(index).build();
+        return this.toBuilder().tableOrder(index).build();
     }
 
     public boolean queryIsOnTable() {
-        return played != null && team == null;
+        return tableOrder != null && team == null;
     }
 
     public CardState moveToTeam(String team) {

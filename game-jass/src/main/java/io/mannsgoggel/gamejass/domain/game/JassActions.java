@@ -21,7 +21,8 @@ public class JassActions {
         PLAY_CARD,
         END_STICH,
         END_ROUND,
-        END_GAME
+        END_GAME,
+        EXIT
     }
 
     public static class JoinPlayer extends Action.BaseAction<String> {
@@ -232,6 +233,8 @@ public class JassActions {
         }
 
         @Override
-        public void apply(GameState state) { }
+        public void apply(GameState state) {
+            state.setNextAction(EXIT);
+        }
     }
 }

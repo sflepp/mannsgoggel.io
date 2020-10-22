@@ -1,4 +1,4 @@
-package io.mannsgoggel.tournamentserver.games.jass.dto;
+package io.mannsgoggel.gamejass.domain.action;
 
 import io.mannsgoggel.gamejass.domain.game.Card;
 import io.mannsgoggel.gamejass.domain.game.GameState;

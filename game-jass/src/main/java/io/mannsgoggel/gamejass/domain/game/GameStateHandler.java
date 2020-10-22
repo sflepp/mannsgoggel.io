@@ -15,12 +15,12 @@ public class GameStateHandler {
 
 
         if (!action.getAction().equals(stateSubject.getState().getNextAction())) {
-           throw new ActionNotAllowed(
-                   "Expected next action " + stateSubject.getState().getNextAction() + " but got " + action.getAction()
-           );
+            throw new ActionNotAllowed(
+                    "Expected next action " + stateSubject.getState().getNextAction() + " but got " + action.getAction()
+            );
         }
 
-        if(!action.getPlayer().equals(stateSubject.getState().getNextPlayer())) {
+        if (!action.getPlayer().equals(stateSubject.getState().getNextPlayer())) {
             throw new ActionNotAllowed(
                     "Expected next player " + stateSubject.getState().getNextPlayer() + " but got " + action.getPlayer()
             );
