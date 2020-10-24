@@ -4,19 +4,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CardState implements Serializable {
+public class CardState {
     Card card;
     String player;
-    Integer tableOrder;
+    Integer playOrder;
     String team;
+    Boolean isTrump;
+    Integer points;
 
     public CardState toPlayerView(String player) {
-        if (this.player == null || this.tableOrder != null || this.player.equals(player)) {
+        if (this.player == null || this.playOrder != null || this.player.equals(player)) {
             return this;
         } else {
             return toBuilder().player("").build();
@@ -24,18 +24,14 @@ public class CardState implements Serializable {
     }
 
     public boolean queryIsOnPlayer() {
-        return tableOrder == null && team == null;
+        return playOrder == null && team == null;
     }
 
     public CardState play(Integer index) {
-        return this.toBuilder().tableOrder(index).build();
+        return this.toBuilder().playOrder(index).build();
     }
 
     public boolean queryIsOnTable() {
-        return tableOrder != null && team == null;
-    }
-
-    public CardState moveToTeam(String team) {
-        return this.toBuilder().team(team).build();
+        return playOrder != null && team == null;
     }
 }

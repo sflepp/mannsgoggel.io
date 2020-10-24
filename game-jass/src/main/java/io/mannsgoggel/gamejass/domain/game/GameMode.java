@@ -17,6 +17,8 @@ public interface GameMode {
 
     List<Card> playableCards(List<Card> handCards, List<Card> tableStack);
 
+    Boolean isTrump(Card card);
+
     enum PlayingMode {
         TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
     }
@@ -94,6 +96,11 @@ public interface GameMode {
 
             return validCards.size() == 0 ? handCards : validCards;
         }
+
+        @Override
+        public Boolean isTrump(Card card) {
+            return false;
+        }
     }
 
     class TopDown implements GameMode {
@@ -155,6 +162,11 @@ public interface GameMode {
                     .collect(Collectors.toList());
 
             return validCards.size() == 0 ? handCards : validCards;
+        }
+
+        @Override
+        public Boolean isTrump(Card card) {
+            return false;
         }
     }
 
@@ -218,6 +230,11 @@ public interface GameMode {
             return validCards.size() == 0
                     || (validCards.size() == 1 && validCards.contains(new Card(trumpColor, Card.Suit.JACK)))
                     ? handCards : validCards;
+        }
+
+        @Override
+        public Boolean isTrump(Card card) {
+            return getTripletFor(card).getValue0();
         }
 
         @Override

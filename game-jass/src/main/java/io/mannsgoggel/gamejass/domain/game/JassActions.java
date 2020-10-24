@@ -147,8 +147,8 @@ public class JassActions {
                 throw new InvalidAction("Playing card " + card.toString() + " is not allowed.");
             }
 
-            var intermediate = state.transformCardState(cardState ->
-                    cardState.getCard().equals(card) ? cardState.play(state.queryTableStack().size()) : cardState);
+            var intermediate = state.cardState(c ->
+                    c.getCard().equals(card) ? c. play(state.queryPlayedCards().size()) : c);
 
             return intermediate
                     .toBuilder()
@@ -173,16 +173,8 @@ public class JassActions {
             var points = tableStackPoints(playingMode, tableStack) + (state.queryRoundFinished() ? 5 : 0);
 
             var intermediate = state
-                    .transformCardState(
-                            cardState -> cardState.queryIsOnTable() ?
-                                    cardState.moveToTeam(winningTeam.getName()) :
-                                    cardState
-                    )
-                    .transformTeam(
-                            team -> team.equals(winningTeam) ?
-                                    team.toBuilder().points(team.getPoints() + points).build() :
-                                    team
-                    );
+                    .cardState(c -> c.queryIsOnTable() ? c.toBuilder().team(winningTeam.getName()).build() : c)
+                    .team(t -> t.equals(winningTeam) ? t.toBuilder().points(t.getPoints() + points).build() : t);
 
             return intermediate.toBuilder()
                     .nextPlayer(intermediate.queryRoundFinished() ? null : winningCardState.getPlayer())
@@ -197,8 +189,7 @@ public class JassActions {
 
         @Override
         public GameState.GameStateBuilder build(GameState state) {
-            return state.toBuilder()
-                    .nextAction(state.getTeams().stream().anyMatch(team -> team.getPoints() >= 1500) ? END_GAME : START_ROUND);
+            return state.toBuilder().nextAction(state.queryGameEnded() ? END_GAME : START_ROUND);
         }
     }
 

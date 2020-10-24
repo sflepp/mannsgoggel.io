@@ -1,10 +1,9 @@
 package io.mannsgoggel.tournamentserver.games.jass;
 
 import io.mannsgoggel.gamejass.domain.action.RemoteAction;
-import io.mannsgoggel.gamejass.domain.player.LocalGameMaster;
+import io.mannsgoggel.gamejass.domain.game.JassGame;
 import io.mannsgoggel.gamejass.domain.player.LocalPlayer;
 import io.mannsgoggel.gamejass.domain.player.RemotePlayer;
-import io.mannsgoggel.gamejass.domain.game.JassGame;
 import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.clients.WebsocketPlayerStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.dto.HelloMessage;
@@ -38,11 +37,10 @@ public class JassWebsocketController {
 
         jassGame = new JassGame(
                 List.of(
-                        new LocalGameMaster(),
+                        player,
                         new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy()),
                         new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy()),
-                        new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy()),
-                        player
+                        new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy())
                 )
         );
 

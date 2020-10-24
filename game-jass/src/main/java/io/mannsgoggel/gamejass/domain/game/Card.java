@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.*;
 
+import static io.mannsgoggel.gamejass.domain.CollectionShortcuts.map;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Card implements Serializable {
+public class Card {
     Color color;
     Suit suit;
 
@@ -25,6 +25,11 @@ public class Card implements Serializable {
     }
 
     public static class CardDeckBuilder {
+
+        public static List<CardState> buildInitial() {
+            return map(build(), card -> CardState.builder().card(card).build());
+        }
+
         public static List<Card> build() {
             List<Card> cards = new ArrayList<>();
 
@@ -37,30 +42,39 @@ public class Card implements Serializable {
             return cards;
         }
 
-        public static CardHandout buildAndShuffle(List<String> players) {
+        public static CardHandout buildAndShuffle(List<String> players, GameMode.PlayingMode mode) {
             List<Card> cards = Card.CardDeckBuilder.build();
 
             Collections.shuffle(cards);
 
-            List<CardState> cardState = new ArrayList<>();
+            List<CardState> cardStates = new ArrayList<>();
 
             for (int i = 0; i < players.size(); i++) {
                 for (int j = i * 9; j < (i + 1) * 9; j++) {
-                    cardState.add(
-                            CardState.builder()
-                                    .card(cards.get(j))
-                                    .player(players.get(i))
-                                    .build()
-                    );
+                    var card = cards.get(j);
+                    var player = players.get(i);
+
+                    var cardState = CardState.builder()
+                            .card(card)
+                            .player(player);
+
+
+                    if (mode != null) {
+                        cardState
+                                .points(JassRules.cardPoints(mode, card))
+                                .isTrump(JassRules.isTrump(mode, card));
+                    }
+
+                    cardStates.add(cardState.build());
                 }
             }
 
-            cardState = cardState.stream()
+            cardStates = cardStates.stream()
                     .sorted(Comparator.comparingInt(a -> a.getCard().getSuit().ordinal()))
                     .sorted(Comparator.comparingInt(a -> a.getCard().getColor().ordinal()))
                     .collect(toUnmodifiableList());
 
-            return new CardHandout(cardState);
+            return new CardHandout(cardStates);
         }
     }
 }

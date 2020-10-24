@@ -1,6 +1,7 @@
 package io.mannsgoggel.gamejass.domain.game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JassRules {
@@ -33,13 +34,16 @@ public class JassRules {
                 .getPoints(card);
     }
 
-    public static List<Card> playableCards(GameMode.PlayingMode playingMode, List<Card> handCards, List<Card> tableStack) {
+    public static boolean isTrump(GameMode.PlayingMode playingMode, Card card) {
         return GameMode.Builder.build(playingMode)
-                .playableCards(handCards, tableStack);
+                .isTrump(card);
     }
 
-    public static Card higherCard(GameMode.PlayingMode playingMode, Card a, Card b) {
+    public static List<Card> playableCards(GameMode.PlayingMode playingMode, List<Card> handCards, List<Card> tableStack) {
+        if (playingMode == null) {
+            return Collections.emptyList();
+        }
         return GameMode.Builder.build(playingMode)
-                .higherCard(a, b);
+                .playableCards(handCards, tableStack);
     }
 }

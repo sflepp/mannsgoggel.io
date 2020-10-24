@@ -11,7 +11,8 @@ import reactor.core.publisher.ReplayProcessor;
 
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+
+import static io.mannsgoggel.gamejass.domain.CollectionShortcuts.map;
 
 @Data
 public class JassGame {
@@ -21,9 +22,7 @@ public class JassGame {
     private GameState currentState;
 
     public void start() {
-        currentState = GameState.withTeams(
-                actors.stream().map(Player::getName).collect(Collectors.toList())
-        );
+        currentState = GameState.withTeams(map(actors, Player::getName));
 
         actors.forEach(state$::subscribe);
         actors.forEach(actor -> actor.setGame(this));
@@ -43,7 +42,7 @@ public class JassGame {
         switch (nextAction) {
             case START_GAME -> dispatchAction(new JassActions.StartGame());
             case START_ROUND -> dispatchAction(new JassActions.StartRound());
-            case HAND_OUT_CARDS -> dispatchAction(new JassActions.HandOutCards(Card.CardDeckBuilder.buildAndShuffle(players)));
+            case HAND_OUT_CARDS -> dispatchAction(new JassActions.HandOutCards(Card.CardDeckBuilder.buildAndShuffle(players, state.getPlayingMode())));
             case SET_STARTING_PLAYER -> dispatchAction(new JassActions.SetStartingPlayer(players.get(new Random().nextInt(players.size()))));
             case END_STICH -> dispatchAction(new JassActions.EndStich());
             case END_ROUND -> dispatchAction(new JassActions.EndRound());
@@ -67,7 +66,6 @@ public class JassGame {
         }
 
         var newState = action.build(currentState.clone())
-                .history(currentState.getHistory().add(action))
                 .revision(currentState.getRevision() + 1)
                 .build();
 
