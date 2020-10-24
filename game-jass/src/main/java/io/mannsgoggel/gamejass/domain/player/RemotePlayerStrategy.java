@@ -1,4 +1,4 @@
-package io.mannsgoggel.gamejass.domain;
+package io.mannsgoggel.gamejass.domain.player;
 
 import io.mannsgoggel.gamejass.domain.action.RemoteAction;
 import io.mannsgoggel.gamejass.domain.action.RequestRemoteAction;

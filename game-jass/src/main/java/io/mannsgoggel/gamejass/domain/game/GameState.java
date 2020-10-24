@@ -1,34 +1,26 @@
 package io.mannsgoggel.gamejass.domain.game;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Data
-public class GameState {
-    private ActionHistory history;
-    private JassActions.ActionType nextAction;
-    private String nextPlayer;
-    private GameMode.PlayingMode playingMode;
-    private Boolean shifted;
-    private List<Team> teams;
-    private List<CardState> cards;
-
-    public GameState() {
-        this.nextAction = JassActions.ActionType.JOIN_PLAYER;
-        this.nextPlayer = "any";
-        this.shifted = false;
-        this.history = new ActionHistory();
-        this.teams = new ArrayList<>();
-        this.cards = Card.CardDeckBuilder.build()
-                .stream()
-                .map(card -> CardState.builder().card(card).build())
-                .collect(toUnmodifiableList());
-    }
+@Builder(toBuilder = true)
+public class GameState implements Cloneable {
+    private final Integer revision;
+    private final ActionHistory history;
+    private final JassActions.ActionType nextAction;
+    private final String nextPlayer;
+    private final GameMode.PlayingMode playingMode;
+    private final Boolean shifted;
+    private final List<Team> teams;
+    private final List<CardState> cards;
 
     public boolean queryStichFinished() {
         return queryTableStack().size() == 4;
@@ -67,21 +59,30 @@ public class GameState {
                 .orElseThrow(() -> new RuntimeException("Player with name " + playerName + " not found."));
     }
 
-    public GameState toPlayerView(String player) {
-        GameState state = new GameState();
-        state.setNextPlayer(nextPlayer);
-        state.setTeams(teams);
-        state.setNextAction(nextAction);
-        state.setPlayingMode(playingMode);
-        state.setShifted(shifted);
-        state.setHistory(history.toPlayerView(player));
-
-        state.setCards(
-                getCards().stream()
+    public static GameState toPlayerView(GameState state, String player) {
+        return state.toBuilder()
+                .history(state.history.toPlayerView(player))
+                .cards(state.getCards().stream()
                         .map(card -> card.toPlayerView(player))
-                        .collect(toUnmodifiableList())
-        );
-        return state;
+                        .collect(toUnmodifiableList()))
+                .build();
+    }
+
+    public static GameState withTeams(List<String> players) {
+        return GameState.builder()
+                .revision(0)
+                .nextAction(JassActions.ActionType.START_GAME)
+                .history(new ActionHistory(Collections.emptyList()))
+                .teams(List.of(
+                        new Team("team-1",
+                                new ArrayList<>(players.subList(0, 2)),
+                                0
+                        ),
+                        new Team("team-1",
+                                new ArrayList<>(players.subList(2, 4)),
+                                0
+                        )
+                )).build();
     }
 
     public List<CardState> queryTableStack() {
@@ -97,16 +98,21 @@ public class GameState {
                 .collect(toUnmodifiableList());
     }
 
-    public void transformTeam(Function<Team, Team> fn) {
-        teams = teams.stream()
-                .map(fn)
-                .collect(toUnmodifiableList());
+    public GameState transformTeam(Function<Team, Team> fn) {
+        return toBuilder()
+                .teams(
+                        teams.stream()
+                                .map(fn)
+                                .collect(toUnmodifiableList())
+                ).build();
     }
 
-    public void transformCardState(Function<CardState, CardState> fn) {
-        cards = cards.stream()
-                .map(fn)
-                .collect(toUnmodifiableList());
+    public GameState transformCardState(Function<CardState, CardState> fn) {
+        return toBuilder()
+                .cards(cards.stream()
+                        .map(fn)
+                        .collect(toUnmodifiableList()))
+                .build();
     }
 
     public CardState queryCardState(Card card) {
@@ -127,5 +133,14 @@ public class GameState {
         return teams.stream()
                 .flatMap(team -> team.getPlayers().stream())
                 .collect(toUnmodifiableList());
+    }
+
+    public boolean isNotNextPlayer(String player) {
+        return (nextPlayer != null || player != null) && (player == null || !player.equals(nextPlayer));
+    }
+
+    @Override
+    protected GameState clone() {
+        return toBuilder().build();
     }
 }

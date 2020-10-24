@@ -1,9 +1,9 @@
 package io.mannsgoggel.tournamentserver.games.jass;
 
 import io.mannsgoggel.gamejass.domain.action.RemoteAction;
-import io.mannsgoggel.gamejass.domain.actors.LocalGameMaster;
-import io.mannsgoggel.gamejass.domain.actors.LocalPlayer;
-import io.mannsgoggel.gamejass.domain.actors.RemotePlayer;
+import io.mannsgoggel.gamejass.domain.player.LocalGameMaster;
+import io.mannsgoggel.gamejass.domain.player.LocalPlayer;
+import io.mannsgoggel.gamejass.domain.player.RemotePlayer;
 import io.mannsgoggel.gamejass.domain.game.JassGame;
 import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.clients.WebsocketPlayerStrategy;

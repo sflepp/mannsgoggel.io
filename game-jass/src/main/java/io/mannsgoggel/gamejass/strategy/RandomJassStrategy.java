@@ -1,6 +1,6 @@
 package io.mannsgoggel.gamejass.strategy;
 
-import io.mannsgoggel.gamejass.domain.PlayerStrategy;
+import io.mannsgoggel.gamejass.domain.player.PlayerStrategy;
 import io.mannsgoggel.gamejass.domain.game.Card;
 import io.mannsgoggel.gamejass.domain.game.GameMode;
 import io.mannsgoggel.gamejass.domain.game.GameState;

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CardState {
+public class CardState implements Serializable {
     Card card;
     String player;
     Integer tableOrder;

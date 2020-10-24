@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -11,7 +12,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Card {
+public class Card implements Serializable {
     Color color;
     Suit suit;
 

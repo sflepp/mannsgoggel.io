@@ -1,7 +1,6 @@
-package io.mannsgoggel.gamejass.domain.actors;
+package io.mannsgoggel.gamejass.domain.player;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mannsgoggel.gamejass.domain.RemotePlayerStrategy;
 import io.mannsgoggel.gamejass.domain.action.RemoteAction;
 import io.mannsgoggel.gamejass.domain.action.RequestRemoteAction;
 import io.mannsgoggel.gamejass.domain.game.Card;
@@ -11,7 +10,7 @@ import io.mannsgoggel.gamejass.domain.game.JassActions;
 
 import static io.mannsgoggel.gamejass.domain.game.JassRules.playableCards;
 
-public class RemotePlayer extends GameActor {
+public class RemotePlayer extends Player {
     private final RemotePlayerStrategy strategy;
 
     public RemotePlayer(String name, RemotePlayerStrategy strategy) {
@@ -21,8 +20,12 @@ public class RemotePlayer extends GameActor {
     }
 
     @Override
-    public void next(GameState state) {
-        this.strategy.nextState(state.toPlayerView(getName()));
+    public void accept(GameState state) {
+        this.strategy.nextState(GameState.toPlayerView(state, getName()));
+
+        if (state.isNotNextPlayer(getName())) {
+            return;
+        }
 
         var playingMode = state.getPlayingMode();
         var handCards = state.queryHandCards(getName());
@@ -34,14 +37,8 @@ public class RemotePlayer extends GameActor {
                 handCards,
                 playableCards,
                 tableCards,
-                state.toPlayerView(getName())
+                GameState.toPlayerView(state, getName())
         ));
-    }
-
-    @Override
-    public void connect() {
-        super.connect();
-        handler.dispatchAction(new JassActions.JoinPlayer(getName()));
     }
 
     public Void onRemoteAction(RemoteAction remoteAction) {
@@ -49,24 +46,24 @@ public class RemotePlayer extends GameActor {
 
         try {
             switch (remoteAction.getActionType()) {
-                case DECIDE_SHIFT -> handler.dispatchAction(
+                case DECIDE_SHIFT -> getGame().dispatchAction(
                         new JassActions.DecideShift(
                                 getName(),
                                 objectMapper.treeToValue(remoteAction.getPayload(), Boolean.class)
                         )
                 );
-                case SET_PLAYING_MODE -> handler.dispatchAction(
+                case SET_PLAYING_MODE -> getGame().dispatchAction(
                         new JassActions.SetPlayingMode(
                                 getName(),
                                 objectMapper.treeToValue(remoteAction.getPayload(), GameMode.PlayingMode.class)
                         )
                 );
-                case START_STICH -> handler.dispatchAction(new JassActions.StartStich(
+                case START_STICH -> getGame().dispatchAction(new JassActions.StartStich(
                                 getName(),
                                 objectMapper.treeToValue(remoteAction.getPayload(), Card.class)
                         )
                 );
-                case PLAY_CARD -> handler.dispatchAction(new JassActions.PlayCard(
+                case PLAY_CARD -> getGame().dispatchAction(new JassActions.PlayCard(
                                 getName(),
                                 objectMapper.treeToValue(remoteAction.getPayload(), Card.class)
                         )

@@ -2,12 +2,13 @@ package io.mannsgoggel.gamejass.domain.game;
 
 import lombok.Value;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
 @Value
-public class CardHandout {
+public class CardHandout implements Serializable {
     List<CardState> cards;
 
     CardHandout toPlayerView(String player) {

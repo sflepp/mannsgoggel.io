@@ -4,13 +4,15 @@ import io.mannsgoggel.gamejass.domain.game.GameState;
 import io.mannsgoggel.gamejass.domain.game.JassActions;
 import lombok.Data;
 
-public interface Action<T> {
+import java.io.Serializable;
+
+public interface Action<T> extends Serializable {
     String getPlayer();
     JassActions.ActionType getAction();
     T getPayload();
     Action<T> toPlayerView(String player);
 
-    void apply(GameState state);
+    GameState.GameStateBuilder build(GameState state);
 
     @Data
     abstract class BaseAction<T> implements Action<T> {

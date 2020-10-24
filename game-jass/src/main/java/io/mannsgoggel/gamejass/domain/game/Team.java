@@ -3,11 +3,12 @@ package io.mannsgoggel.gamejass.domain.game;
 import lombok.Builder;
 import lombok.Value;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Value
 @Builder(toBuilder = true)
-public class Team {
+public class Team implements Serializable {
     String name;
     List<String> players;
     Integer points;
@@ -22,5 +23,10 @@ public class Team {
                 .filter(player -> !player.equals(playerName))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player " + playerName + " not found in team"));
+    }
+
+    @Override
+    protected Team clone() throws CloneNotSupportedException {
+        return (Team) super.clone();
     }
 }

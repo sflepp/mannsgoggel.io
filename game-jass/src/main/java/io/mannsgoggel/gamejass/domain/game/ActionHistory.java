@@ -1,32 +1,39 @@
 package io.mannsgoggel.gamejass.domain.game;
 
 import io.mannsgoggel.gamejass.domain.action.Action;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @RequiredArgsConstructor
-public class ActionHistory {
-    private List<Action> actions = new ArrayList<>();
+@Builder(toBuilder = true)
+public class ActionHistory implements Serializable {
+    private final List<Action<?>> actions;
 
-    public void add(Action action) {
-        actions.add(action);
+    public ActionHistory add(Action<?> action) {
+        return toBuilder()
+                .actions(
+                        Stream.concat(actions.stream(), Stream.of(action))
+                                .collect(Collectors.toUnmodifiableList())
+                )
+                .build();
     }
 
-    public Action getLast() {
+    public Action<?> getLast() {
         return actions.get(actions.size() - 1);
     }
 
     public ActionHistory toPlayerView(String player) {
-        var history =  new ActionHistory();
-        history.setActions(actions.stream()
-                .map(action -> action.toPlayerView(player))
-                .collect(Collectors.toUnmodifiableList())
-        );
-        return history;
+        return toBuilder()
+                .actions(actions.stream()
+                        .map(action -> action.toPlayerView(player))
+                        .collect(Collectors.toUnmodifiableList())
+                ).build();
     }
 }

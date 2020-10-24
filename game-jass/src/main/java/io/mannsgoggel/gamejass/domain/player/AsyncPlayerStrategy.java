@@ -1,4 +1,4 @@
-package io.mannsgoggel.gamejass.domain;
+package io.mannsgoggel.gamejass.domain.player;
 
 import io.mannsgoggel.gamejass.domain.game.Card;
 import io.mannsgoggel.gamejass.domain.game.GameMode;
