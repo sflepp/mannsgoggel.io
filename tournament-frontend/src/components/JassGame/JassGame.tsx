@@ -6,7 +6,6 @@ import SockJsClient from 'react-stomp';
 import { setRequestNextAction } from '../../actions';
 import store from '../../store';
 import GameStateView from './GameStateView';
-import { runWebWorker } from '../../services/Webworker';
 
 const mapStateToProps = (state: State) => {
     return state;
@@ -21,11 +20,11 @@ export const JassGame = (state: State) => {
         console.log(message);
 
         /** Todo: Move to appropriate place */
-        switch (message.action) {
+        /* switch (message.action) {
             case 'DECIDE_SHIFT':
-                runWebWorker(state.editor.playerCode, [
+                testWithWorker(state.editor.playerCode, [
                     `decideShift(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).then((data) => {
+                ]).run().then((data) => {
                     webSocket.sendMessage('/app/jass/action', JSON.stringify({
                         actionType: message.action,
                         payload: data[0]
@@ -33,9 +32,9 @@ export const JassGame = (state: State) => {
                 }).catch(e => console.log(e));
                 break;
             case 'SET_PLAYING_MODE':
-                runWebWorker(state.editor.playerCode, [
+                testWithWorker(state.editor.playerCode, [
                     `choosePlayingMode(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).then((data) => {
+                ]).run().then((data) => {
                     webSocket.sendMessage('/app/jass/action', JSON.stringify({
                         actionType: message.action,
                         payload: data[0]
@@ -43,9 +42,9 @@ export const JassGame = (state: State) => {
                 }).catch(e => console.log(e));
                 break;
             case 'START_STICH':
-                runWebWorker(state.editor.playerCode, [
+                testWithWorker(state.editor.playerCode, [
                     `startStich(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).then((data) => {
+                ]).run().then((data) => {
                     webSocket.sendMessage('/app/jass/action', JSON.stringify({
                         actionType: message.action,
                         payload: data[0]
@@ -53,16 +52,16 @@ export const JassGame = (state: State) => {
                 }).catch(e => console.log(e));
                 break;
             case 'PLAY_CARD':
-                runWebWorker(state.editor.playerCode, [
+                testWithWorker(state.editor.playerCode, [
                     `playCard(${JSON.stringify(message.handCards)},${JSON.stringify(message.playableCards)},${JSON.stringify(message.tableStack)},${JSON.stringify(message.gameState)})`
-                ]).then((data) => {
+                ]).run().then((data) => {
                     webSocket.sendMessage('/app/jass/action', JSON.stringify({
                         actionType: message.action,
                         payload: data[0]
                     }));
                 }).catch(e => console.log(e));
                 break;
-        }
+        } */
 
         store.dispatch(setRequestNextAction(message));
 

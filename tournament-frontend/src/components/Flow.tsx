@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { setNextFlowStep } from '../actions';
 import store from '../store';
-import CodeEditor from './CodeEditor';
 import JassGame from './JassGame/JassGame';
+import CodeEditor from './CodeEditor/CodeEditor';
+import CodeTestRunner from './CodeEditor/CodeTestRunner';
 
 const { Step } = Steps;
 
@@ -23,22 +24,28 @@ const Flow = (state: State) => {
 
     const step = state.flow.currentStep;
 
-    let contentFlow = [
+    const contentFlow = [
         <CodeEditor/>,
         <JassGame/>,
         <div>Submit</div>
     ]
 
-    let affixTextFlow = [
-        'Play',
+    const affixTextFlow = [
+        'Play Game',
         'Submit'
     ]
+
+    let disabled = false;
+
+    if (step === 0) {
+        disabled = state.codeTest.results.map(e => e.error !== undefined).reduce((a, b) => a || b, false);
+    }
 
     return (
         <div>
             <Steps current={state.flow.currentStep} onChange={setFlowStep}>
                 <Step title="Code & Test" description="Code your strategy"/>
-                <Step title="Play" description="Run against others"/>
+                <Step title="Play Game" description="Run against others"/>
                 <Step title="Submit" description="Submit your strategy"/>
             </Steps>
 
@@ -46,7 +53,8 @@ const Flow = (state: State) => {
                 <br/>
                 <div style={{textAlign: 'right'}}>
                     <Affix offsetTop={16}>
-                        <Button type="primary" onClick={() => setFlowStep(state.flow.currentStep + 1)}>
+                        { (state.flow.currentStep === 0 && <CodeTestRunner/>)}
+                        <Button disabled={disabled} type="primary" onClick={() => setFlowStep(state.flow.currentStep + 1)}>
                             {affixTextFlow[step]}
                         </Button>
                     </Affix>

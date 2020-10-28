@@ -1,9 +1,13 @@
+import { CodeRunResult } from '../reducers';
+
 export type ActionType = 'ADD_ARTICLE'
     | 'UPDATE_GAME_STATE'
     | 'SET_REQUEST_NEXT_ACTION'
     | 'UPDATE_CODE'
     | 'SET_CODE_ERROR'
-    | 'SET_NEXT_FLOW_STEP';
+    | 'SET_NEXT_FLOW_STEP'
+    | 'CODE_TEST_REQUEST'
+    | 'CODE_TEST_RESULT'
 
 export interface Action {
     type: ActionType;
@@ -32,4 +36,12 @@ export function setNextFlowStep(payload: number): Action {
 
 export function setCodeError(payload: any): Action {
     return { type: 'SET_CODE_ERROR', payload: payload }
+}
+
+export function codeTestRequest(): Action {
+    return { type: 'CODE_TEST_REQUEST', payload: null }
+}
+
+export function codeTestResult(payload: CodeRunResult[]): Action {
+    return { type: 'CODE_TEST_RESULT', payload: payload }
 }

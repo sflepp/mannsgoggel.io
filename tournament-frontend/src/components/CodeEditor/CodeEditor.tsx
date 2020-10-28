@@ -4,12 +4,11 @@ import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
-import { CodeEditorState, State } from '../reducers';
-import { setCodeError, updateCode } from '../actions';
+import { CodeEditorState, State } from '../../reducers';
+import { updateCode } from '../../actions';
 import { connect } from 'react-redux';
-import store from '../store';
-import { message } from 'antd';
-import { runWebWorker } from '../services/Webworker';
+import store from '../../store';
+import CodeTestRunner from './CodeTestRunner';
 // @ts-ignore
 
 const mapStateToProps = (state: State) => {
@@ -18,29 +17,8 @@ const mapStateToProps = (state: State) => {
 
 const CodeEditor = (state: CodeEditorState) => {
 
-    console.log(state);
-
     const onValueChange = (code: string) => {
         store.dispatch(updateCode(code))
-    }
-
-    if (state.playerCodeChanged) {
-        runWebWorker(state.playerCode, [
-            'decideShift([], [])',
-            'choosePlayingMode([], {})',
-            'startStich([], {})'
-        ]).then((data) => {
-
-        }).catch((error) => {
-            if (error.message !== undefined) {
-                store.dispatch(setCodeError({
-                    line: error.lineno,
-                    message: error.message
-                }));
-
-                message.error(error.message)
-            }
-        });
     }
 
     return <div>
@@ -48,7 +26,7 @@ const CodeEditor = (state: CodeEditorState) => {
             value={state.playerCode}
             onValueChange={onValueChange}
             highlight={code => highlight(code, languages.js)}
-            padding={10}
+            padding={20}
             style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
                 fontSize: 16,
@@ -56,8 +34,6 @@ const CodeEditor = (state: CodeEditorState) => {
             className="container__editor"
         />
     </div>
-
-
 }
 
 export default connect(mapStateToProps)(CodeEditor);

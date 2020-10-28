@@ -1,14 +1,9 @@
 import React from 'react';
 import './App.css';
-import JassGame from './components/JassGame/JassGame';
-import CodeEditor from './components/CodeEditor';
-import { Breadcrumb, Layout, Menu, Steps } from 'antd';
+import { Breadcrumb, Layout, Menu} from 'antd';
 import {
     LaptopOutlined,
-    LoadingOutlined,
     NotificationOutlined,
-    SmileOutlined,
-    SolutionOutlined,
     UserOutlined
 } from '@ant-design/icons';
 import Flow from './components/Flow';

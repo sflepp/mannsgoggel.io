@@ -9,7 +9,20 @@ export interface State {
     gameState: GameState;
     requests: RemoteActionRequest[];
     editor: CodeEditorState;
+    codeTest: CodeTestState;
     flow: Flow;
+}
+
+export interface CodeTestState {
+    status: 'RUNNING' | 'DONE';
+    results: CodeRunResult[];
+}
+
+export interface CodeRunResult {
+    description: string;
+    fn: string;
+    result?: string;
+    error?: string;
 }
 
 export interface CodeEditorState {
@@ -70,6 +83,10 @@ const initialState: State = {
     flow: {
         currentStep: 0,
     },
+    codeTest: {
+        status: 'DONE',
+        results: []
+    },
     editor: {
         playerCodeChanged: false,
         playerCode:
@@ -125,8 +142,28 @@ function playCard(handCards, playableCards, tableStack, gameState) {
     }
 };
 
-function rootReducer(state: State = initialState, action: Action) {
+function rootReducer(state: State = initialState, action: Action): State {
     switch (action.type) {
+        case 'CODE_TEST_REQUEST':
+            return {
+                ...state,
+                ...{
+                    codeTest: {
+                        status: 'RUNNING',
+                        results: []
+                    }
+                }
+            }
+        case 'CODE_TEST_RESULT':
+            return {
+                ...state,
+                ...{
+                    codeTest: {
+                        status: 'DONE',
+                        results: action.payload
+                    }
+                }
+            }
         case 'SET_NEXT_FLOW_STEP':
             return {
                 ...state,
