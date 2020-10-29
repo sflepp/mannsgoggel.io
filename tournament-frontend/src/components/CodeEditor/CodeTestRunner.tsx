@@ -1,12 +1,10 @@
 import { CodeTestState, State } from '../../reducers';
 import { connect } from 'react-redux';
 import React from 'react';
-import store from '../../store';
-import { Unsubscribe } from 'redux';
-import { codeTestResult } from '../../actions';
-import { Badge, Popover } from 'antd';
-import { testWorker } from '../../services/TestingWebWorker';
-import { Alert } from 'antd';
+import { Action, codeTestResult } from '../../actions';
+import { Alert, Badge, Popover } from 'antd';
+import { codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
+import { call, put, takeLatest } from 'redux-saga/effects';
 
 interface ClassStateValues {
     code: string;
@@ -20,84 +18,62 @@ function mapStateToProps(state: State): ClassStateValues {
     };
 }
 
-class CodeTestRunner extends React.Component<ClassStateValues> {
-    private worker: Worker;
-    private unsubscribe: Unsubscribe;
-    private currentState: ClassStateValues;
-
-    componentDidMount() {
-        this.unsubscribe = store.subscribe(() => {
-            let previousState = this.currentState;
-            this.currentState = mapStateToProps(store.getState());
-
-            if (this.currentState.code !== previousState?.code) {
-                if (this.currentState.test.status === 'RUNNING') {
-                    this.worker.terminate();
+export function* runTestsSaga() {
+    yield takeLatest('UPDATE_CODE', function* (action: Action) {
+        try {
+            const tests = [
+                {
+                    description: 'decideShift() should return a boolean',
+                    fn: `typeof decideShift([], []) === 'boolean'`
+                },
+                {
+                    description: 'choosePlayingMode() should return valid playing mode',
+                    fn: `['TOP_DOWN', 'BOTTOM_UP', 'TRUMP_HEARTHS', 'TRUMP_SPADES', 'TRUMP_DIAMONDS', 'TRUMP_CLUBS'].includes(choosePlayingMode([], {}))`
                 }
+            ];
 
-                const code = this.currentState.code;
-
-                const tests = [
-                    {
-                        description: 'decideShift() should return a boolean',
-                        fn: `typeof decideShift([], []) === 'boolean'`
-                    },
-                    {
-                        description: 'choosePlayingMode() should return valid playing mode',
-                        fn: `['TOP_DOWN', 'BOTTOM_UP', 'TRUMP_HEARTHS', 'TRUMP_SPADES', 'TRUMP_DIAMONDS', 'TRUMP_CLUBS'].includes(choosePlayingMode([], {}))`
-                    }
-                ];
-
-                const worker = testWorker(code, tests);
-
-                this.worker = worker.instance;
-
-                worker.run()
-                    .then(result => {
-                        store.dispatch(codeTestResult(result))
-                    })
-                    .catch(error => {
-                        store.dispatch(codeTestResult([{
-                            description: 'Syntax error',
-                            fn: code,
-                            error: JSON.stringify(error)
-                        }]));
-                    })
-
-                this.worker = worker.instance;
-            }
-        });
-    }
-
-    componentWillUnmount() {
-        this.unsubscribe();
-
-        if (this.worker !== undefined) {
-            this.worker.terminate();
+            yield put(codeTestResult(yield call(codeExecutionWorker, action.payload, tests)));
+        } catch (error) {
+            yield put(codeTestResult([{
+                description: 'Syntax error',
+                fn: action.payload,
+                executionTime: 0,
+                error: JSON.stringify(error)
+            }]));
         }
-    }
+    });
+}
 
-    render() {
-        const badges = this.props.test.results.map(result => {
-            let content;
-            let status: 'error' | 'success';
+const CodeTestRunner = (state: ClassStateValues) => {
+    const badges = state.test.results.map(result => {
+        let content;
+        let status: 'error' | 'success';
 
-            if (result.error !== undefined) {
-               content = <Alert message="Failed" description={result.description} type="error" showIcon />;
-               status = 'error';
-            } else if (result.result !== 'true') {
-                content = <Alert message="Failed" description={result.description} type="error" showIcon />
-                status = 'error';
-            } else {
-                content = <Alert message="Success" description={result.description} type="success" showIcon />
-                status = 'success';
-            }
+        if (result.error !== undefined) {
+            content = <Alert message="Failed" description={result.description} type="error" showIcon/>;
+            status = 'error';
+        } else if (result.result !== 'true') {
+            content = <Alert message="Failed" description={result.description} type="error" showIcon/>
+            status = 'error';
+        } else {
+            content = <Alert message="Success" description={result.description} type="success" showIcon/>
+            status = 'success';
+        }
 
-            return <Popover placement="bottom" key={result.description} content={content}><Badge status={status}/></Popover>
-        })
+        return <Popover placement="bottom" key={result.description} content={content}><Badge
+            status={status}/></Popover>
+    });
 
-        return (<div style={{ display: "inline", paddingRight: "10px" }}>{badges}</div>);
-    }
+    const totalExecutionTime = state.test.results.map(result => result.executionTime).reduce((a, b) => a + b, 0);
+
+    const red = Math.min(255, (totalExecutionTime / 1000 * 255) + 80);
+    const green = Math.min(255, ((1 - (totalExecutionTime / 1000)) * 255) + 80);
+
+    return (
+        <>
+            <div style={{ display: "inline", paddingRight: "10px" }}>{badges} <span style={{color: `rgb(${red}, ${green}, 80)`}}>{totalExecutionTime} ms</span></div>
+        </>
+    );
 }
 
 

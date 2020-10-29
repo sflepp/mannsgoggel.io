@@ -1,6 +1,6 @@
 import { State } from '../reducers';
 import { Affix, Button, Steps } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { setNextFlowStep } from '../actions';
 import store from '../store';
@@ -19,8 +19,6 @@ const Flow = (state: State) => {
     const setFlowStep = (next: number) => {
         store.dispatch(setNextFlowStep(next));
     }
-
-    const [top, setTop] = useState(10);
 
     const step = state.flow.currentStep;
 
@@ -51,10 +49,11 @@ const Flow = (state: State) => {
 
             {step <= 2 && <>
                 <br/>
-                <div style={{textAlign: 'right'}}>
+                <div style={{ textAlign: 'right' }}>
                     <Affix offsetTop={16}>
-                        { (state.flow.currentStep === 0 && <CodeTestRunner/>)}
-                        <Button disabled={disabled} type="primary" onClick={() => setFlowStep(state.flow.currentStep + 1)}>
+                        {(state.flow.currentStep === 0 && <CodeTestRunner/>)}
+                        <Button disabled={disabled} type="primary"
+                                onClick={() => setFlowStep(state.flow.currentStep + 1)}>
                             {affixTextFlow[step]}
                         </Button>
                     </Affix>

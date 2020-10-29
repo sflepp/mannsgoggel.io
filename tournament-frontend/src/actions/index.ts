@@ -1,8 +1,9 @@
-import { CodeRunResult } from '../reducers';
+import { CodeExecutionResult } from '../services/CodeExecutionWebWorker';
 
 export type ActionType = 'ADD_ARTICLE'
     | 'UPDATE_GAME_STATE'
-    | 'SET_REQUEST_NEXT_ACTION'
+    | 'SET_ACTION_REQUEST'
+    | 'SET_ACTION_RESULT'
     | 'UPDATE_CODE'
     | 'SET_CODE_ERROR'
     | 'SET_NEXT_FLOW_STEP'
@@ -19,7 +20,11 @@ export function addArticle(payload: any): Action {
 }
 
 export function setRequestNextAction(payload: any): Action {
-    return { type: 'SET_REQUEST_NEXT_ACTION', payload: payload }
+    return { type: 'SET_ACTION_REQUEST', payload: payload }
+}
+
+export function setResultCodeExecution(payload: CodeExecutionResult): Action {
+    return { type: 'SET_ACTION_RESULT', payload: payload}
 }
 
 export function updateGameState(payload: any): Action {
@@ -42,6 +47,6 @@ export function codeTestRequest(): Action {
     return { type: 'CODE_TEST_REQUEST', payload: null }
 }
 
-export function codeTestResult(payload: CodeRunResult[]): Action {
+export function codeTestResult(payload: CodeExecutionResult[]): Action {
     return { type: 'CODE_TEST_RESULT', payload: payload }
 }

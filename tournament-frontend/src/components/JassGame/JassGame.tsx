@@ -1,11 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { State } from '../../reducers';
+import { GameState, RemoteActionRequest, State } from '../../reducers';
 // @ts-ignore
 import SockJsClient from 'react-stomp';
-import { setRequestNextAction } from '../../actions';
+import { Action, setRequestNextAction, setResultCodeExecution, updateGameState } from '../../actions';
 import store from '../../store';
 import GameStateView from './GameStateView';
+import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
+import { call, put, select, takeEvery } from 'redux-saga/effects'
+
 
 const mapStateToProps = (state: State) => {
     return state;
@@ -13,58 +16,64 @@ const mapStateToProps = (state: State) => {
 
 let webSocket: any;
 
+
+const evaluateFunction = (action: RemoteActionRequest): CodeExecutionDescription => {
+    switch (action.action) {
+        case 'DECIDE_SHIFT':
+            return {
+                description: 'DECIDE_SHIFT',
+                fn: `decideShift(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
+            };
+        case 'SET_PLAYING_MODE':
+            return {
+                description: 'SET_PLAYING_MODE',
+                fn: `choosePlayingMode(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
+            };
+        case 'START_STICH':
+            return {
+                description: 'START_STICH',
+                fn: `startStich(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
+            };
+        case 'PLAY_CARD':
+            return {
+                description: 'PLAY_CARD',
+                fn: `playCard(${JSON.stringify(action.handCards)},${JSON.stringify(action.playableCards)},${JSON.stringify(action.tableStack)},${JSON.stringify(action.gameState)})`
+            }
+        default:
+            throw new Error(`Unknown action: ${JSON.stringify(action)}`);
+    }
+}
+
+export function* calculateSaga() {
+    yield takeEvery('SET_ACTION_REQUEST', function* (action: Action) {
+        try {
+            const code = yield select((state: State) => state.editor.playerCode);
+            const result = yield call(codeExecutionWorker, code, [evaluateFunction(action.payload)]);
+            yield put(setResultCodeExecution(result[0]))
+        } catch (e) {
+            console.error('saga error', e);
+        }
+    });
+}
+
+
+export function* sendActionSaga() {
+    yield takeEvery('SET_ACTION_RESULT', (action: Action) => {
+        webSocket.sendMessage('/app/jass/action', JSON.stringify({
+            actionType: action.payload.description,
+            payload: JSON.parse(action.payload.result)
+        }));
+    })
+}
+
 export const JassGame = (state: State) => {
 
-    const onMessage = (message: any) => {
-
-        console.log(message);
-
-        /** Todo: Move to appropriate place */
-        /* switch (message.action) {
-            case 'DECIDE_SHIFT':
-                testWithWorker(state.editor.playerCode, [
-                    `decideShift(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).run().then((data) => {
-                    webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                        actionType: message.action,
-                        payload: data[0]
-                    }));
-                }).catch(e => console.log(e));
-                break;
-            case 'SET_PLAYING_MODE':
-                testWithWorker(state.editor.playerCode, [
-                    `choosePlayingMode(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).run().then((data) => {
-                    webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                        actionType: message.action,
-                        payload: data[0]
-                    }));
-                }).catch(e => console.log(e));
-                break;
-            case 'START_STICH':
-                testWithWorker(state.editor.playerCode, [
-                    `startStich(${JSON.stringify(message.handCards)},${JSON.stringify(message.gameState)})`
-                ]).run().then((data) => {
-                    webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                        actionType: message.action,
-                        payload: data[0]
-                    }));
-                }).catch(e => console.log(e));
-                break;
-            case 'PLAY_CARD':
-                testWithWorker(state.editor.playerCode, [
-                    `playCard(${JSON.stringify(message.handCards)},${JSON.stringify(message.playableCards)},${JSON.stringify(message.tableStack)},${JSON.stringify(message.gameState)})`
-                ]).run().then((data) => {
-                    webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                        actionType: message.action,
-                        payload: data[0]
-                    }));
-                }).catch(e => console.log(e));
-                break;
-        } */
-
+    const onRequestNextAction = (message: RemoteActionRequest) => {
         store.dispatch(setRequestNextAction(message));
+    }
 
+    const onGameStateUpdate = (message: GameState) => {
+        store.dispatch(updateGameState(message));
     }
 
     const connect = () => {
@@ -79,14 +88,15 @@ export const JassGame = (state: State) => {
         <div>
             <h1>Game State</h1>
             <div>
-                Next action: { state.gameState.nextAction }
+                Next action: {state.gameState.nextAction}
             </div>
             <GameStateView/>
         </div>
     ) : <div>Game has not started.</div>;
 
     return <div>
-        <SockJsClient url='http://localhost:8080/ws' topics={['/game/request-action']} onMessage={onMessage} ref={ref}/>
+        <SockJsClient url='http://localhost:8080/ws' topics={['/game/request-action']} onMessage={onRequestNextAction} ref={ref}/>
+        <SockJsClient url='http://localhost:8080/ws' topics={['/game/state']} onMessage={onGameStateUpdate} ref={ref}/>
 
         {gameStateView}
 

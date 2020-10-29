@@ -1,4 +1,5 @@
 import { Action } from '../actions';
+import { CodeExecutionResult } from '../services/CodeExecutionWebWorker';
 
 export interface State {
     articles: {
@@ -7,7 +8,8 @@ export interface State {
     }[];
     nextAction: string;
     gameState: GameState;
-    requests: RemoteActionRequest[];
+    actionRequest?: RemoteActionRequest;
+    actionResult?: CodeExecutionResult;
     editor: CodeEditorState;
     codeTest: CodeTestState;
     flow: Flow;
@@ -15,7 +17,7 @@ export interface State {
 
 export interface CodeTestState {
     status: 'RUNNING' | 'DONE';
-    results: CodeRunResult[];
+    results: CodeExecutionResult[];
 }
 
 export interface CodeRunResult {
@@ -23,12 +25,11 @@ export interface CodeRunResult {
     fn: string;
     result?: string;
     error?: string;
+    consoleOutput?: string[];
 }
 
 export interface CodeEditorState {
     playerCode: string;
-    playerCodeChanged: boolean;
-    error?: any;
 }
 
 export interface Flow {
@@ -79,7 +80,6 @@ const initialState: State = {
     ],
     nextAction: '',
     gameState: null,
-    requests: [],
     flow: {
         currentStep: 0,
     },
@@ -88,8 +88,7 @@ const initialState: State = {
         results: []
     },
     editor: {
-        playerCodeChanged: false,
-        playerCode:
+        playerCode: !!localStorage.getItem('playerCode') ? localStorage.getItem('playerCode') :
             `
 /**
  * Is called in the beginning of a round if you are the first player.
@@ -173,11 +172,15 @@ function rootReducer(state: State = initialState, action: Action): State {
                     }
                 }
             };
-        case 'SET_REQUEST_NEXT_ACTION':
+        case 'SET_ACTION_REQUEST':
             return {
                 ...state,
-                ...{ nextAction: action.payload.nextAction },
-                ...{ gameState: action.payload.gameState }
+                ...{ actionRequest: action.payload },
+            }
+        case 'SET_ACTION_RESULT':
+            return {
+                ...state,
+                ...{ actionResult: action.payload },
             }
         case 'UPDATE_GAME_STATE':
             return {
@@ -197,7 +200,6 @@ function rootReducer(state: State = initialState, action: Action): State {
                 ...state,
                 ...{
                     editor: {
-                        playerCodeChanged: true,
                         playerCode: action.payload
                     }
                 }
