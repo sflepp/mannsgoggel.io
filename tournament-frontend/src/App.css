@@ -5,3 +5,50 @@
   color: #ececec;
 }
 
+.card {
+  position: relative;
+  width: 100px;
+  background-size: contain;
+  background-position: 0% 0%;
+}
+
+.card::after {
+  content: " ";
+  display: block;
+  padding-top: 140%;
+}
+
+.table-stack {
+  position: relative;
+  height: 250px;
+}
+
+.table-stack .card {
+  position: absolute;
+}
+
+.table-stack .card:nth-child(2) {
+  top: 30px;
+  left: 20px;
+}
+
+.table-stack .card:nth-child(3) {
+  top: 60px;
+  left: 40px;
+}
+
+.table-stack .card:nth-child(4) {
+  top: 90px;
+  left: 60px;
+}
+
+.player-hand {
+  position: relative;
+  height: 200px;
+}
+
+.player-hand .card-wrapper {
+  position: absolute;
+}
+
+

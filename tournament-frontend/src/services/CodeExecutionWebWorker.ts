@@ -17,11 +17,11 @@ export interface CodeExecutionResult {
 export function codeExecutionWorker(code: string, functions: CodeExecutionDescription[]): Promise<CodeExecutionResult[]> {
     return new Promise((resolve: (value: CodeExecutionResult[]) => void, reject) => {
         const workerJavascript = `${code}
+        var logFn = console.log;
         self.addEventListener('message', function(event) {
             self.postMessage(
                 event.data.functions.map(test => {
                     var log = [];
-                    var logFn = console.log;
         
                     console.log = (...args) => {
                         log.push(args.map(e => JSON.stringify(e)).join(', '));
@@ -42,11 +42,9 @@ export function codeExecutionWorker(code: string, functions: CodeExecutionDescri
             );
         }, false);`;
 
-        const worker = new Worker(URL.createObjectURL(
-            new Blob([workerJavascript], {
-                type: 'text/javascript'
-            }))
-        );
+        const blobUrl = URL.createObjectURL(new Blob([workerJavascript], { type: 'text/javascript' }));
+
+        const worker = new Worker(blobUrl);
 
         const timeout = setTimeout(() => {
             worker.terminate();
@@ -58,14 +56,18 @@ export function codeExecutionWorker(code: string, functions: CodeExecutionDescri
             }]);
         }, TIMEOUT);
 
-        worker.onmessage = (event) => {
+        const kill = () => {
             clearTimeout(timeout);
             worker.terminate();
+            URL.revokeObjectURL(blobUrl);
+        }
+
+        worker.onmessage = (event) => {
+            kill();
             resolve(event.data as CodeExecutionResult[]);
         }
         worker.onerror = (error) => {
-            clearTimeout(timeout);
-            worker.terminate();
+            kill();
             if (error.message !== undefined) {
                 reject(error);
             }

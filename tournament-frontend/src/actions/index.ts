@@ -1,7 +1,7 @@
 import { CodeExecutionResult } from '../services/CodeExecutionWebWorker';
 
-export type ActionType = 'ADD_ARTICLE'
-    | 'UPDATE_GAME_STATE'
+export type ActionType =
+    'UPDATE_GAME_STATE'
     | 'SET_ACTION_REQUEST'
     | 'SET_ACTION_RESULT'
     | 'UPDATE_CODE'
@@ -9,14 +9,11 @@ export type ActionType = 'ADD_ARTICLE'
     | 'SET_NEXT_FLOW_STEP'
     | 'CODE_TEST_REQUEST'
     | 'CODE_TEST_RESULT'
+    | 'SET_SPEED'
 
 export interface Action {
     type: ActionType;
     payload: any;
-}
-
-export function addArticle(payload: any): Action {
-    return { type: "ADD_ARTICLE", payload: payload }
 }
 
 export function setRequestNextAction(payload: any): Action {
@@ -49,4 +46,8 @@ export function codeTestRequest(): Action {
 
 export function codeTestResult(payload: CodeExecutionResult[]): Action {
     return { type: 'CODE_TEST_RESULT', payload: payload }
+}
+
+export function updateSpeed(payload: number): Action {
+    return { type: 'SET_SPEED', payload: payload }
 }

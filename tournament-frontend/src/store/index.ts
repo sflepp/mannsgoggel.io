@@ -14,12 +14,10 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const sagaMiddleware = createSagaMiddleware();
 
-/* eslint-disable no-underscore-dangle */
 const store = createStore(
     rootReducer,
     composeEnhancers(applyMiddleware(sagaMiddleware))
 );
-/* eslint-enable */
 
 sagaMiddleware.run(calculateSaga);
 sagaMiddleware.run(sendActionSaga);

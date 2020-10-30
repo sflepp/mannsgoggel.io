@@ -66,12 +66,13 @@ const CodeTestRunner = (state: ClassStateValues) => {
 
     const totalExecutionTime = state.test.results.map(result => result.executionTime).reduce((a, b) => a + b, 0);
 
-    const red = Math.min(255, (totalExecutionTime / 1000 * 255) + 80);
-    const green = Math.min(255, ((1 - (totalExecutionTime / 1000)) * 255) + 80);
+    const red = Math.min(200, (totalExecutionTime / 1000 * 255) + 80);
+    const green = Math.min(200, ((1 - (totalExecutionTime / 1000)) * 255) + 80);
 
     return (
         <>
-            <div style={{ display: "inline", paddingRight: "10px" }}>{badges} <span style={{color: `rgb(${red}, ${green}, 80)`}}>{totalExecutionTime} ms</span></div>
+            <div style={{ display: "inline", paddingRight: "10px" }}>{badges}<span
+                style={{ fontWeight: 'bold', color: `rgb(${red}, ${green}, 26)` }}>{totalExecutionTime} ms</span></div>
         </>
     );
 }

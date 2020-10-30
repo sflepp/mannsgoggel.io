@@ -3,19 +3,18 @@ import { connect } from 'react-redux';
 import { GameState, RemoteActionRequest, State } from '../../reducers';
 // @ts-ignore
 import SockJsClient from 'react-stomp';
-import { Action, setRequestNextAction, setResultCodeExecution, updateGameState } from '../../actions';
+import { Action, setRequestNextAction, setResultCodeExecution, updateGameState, updateSpeed } from '../../actions';
 import store from '../../store';
 import GameStateView from './GameStateView';
 import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { call, put, select, takeEvery } from 'redux-saga/effects'
-
+import { Slider } from 'antd';
 
 const mapStateToProps = (state: State) => {
     return state;
 };
 
 let webSocket: any;
-
 
 const evaluateFunction = (action: RemoteActionRequest): CodeExecutionDescription => {
     switch (action.action) {
@@ -56,9 +55,20 @@ export function* calculateSaga() {
     });
 }
 
+const speedReduction = (speed: number): Promise<void> => {
+    return new Promise<void>(resolve => {
+        const millis = Math.pow(100 - speed, 2);
+        if (millis === 0) {
+            resolve();
+        }
+        setTimeout(resolve, millis);
+    })
+}
 
 export function* sendActionSaga() {
-    yield takeEvery('SET_ACTION_RESULT', (action: Action) => {
+    yield takeEvery('SET_ACTION_RESULT', function* (action: Action) {
+        const speed = yield select((state: State) => state.speed);
+        yield call(speedReduction, speed)
         webSocket.sendMessage('/app/jass/action', JSON.stringify({
             actionType: action.payload.description,
             payload: JSON.parse(action.payload.result)
@@ -66,24 +76,27 @@ export function* sendActionSaga() {
     })
 }
 
+const changeSpeed = (speed: number) => {
+    store.dispatch(updateSpeed(speed));
+}
+
+const ref = (ref: any) => {
+    webSocket = ref
+}
+
+const createNewGame = () => {
+    webSocket.sendMessage('/app/jass/new-game', JSON.stringify({ name: '' }));
+}
+
+const onGameStateUpdate = (message: GameState) => {
+    store.dispatch(updateGameState(message));
+}
+
+const onRequestNextAction = (message: RemoteActionRequest) => {
+    store.dispatch(setRequestNextAction(message));
+}
+
 export const JassGame = (state: State) => {
-
-    const onRequestNextAction = (message: RemoteActionRequest) => {
-        store.dispatch(setRequestNextAction(message));
-    }
-
-    const onGameStateUpdate = (message: GameState) => {
-        store.dispatch(updateGameState(message));
-    }
-
-    const connect = () => {
-        webSocket.sendMessage('/app/jass/new-game', JSON.stringify({ name: '' }));
-    }
-
-    const ref = (ref: any) => {
-        webSocket = ref
-    }
-
     const gameStateView = state.gameState ? (
         <div>
             <h1>Game State</h1>
@@ -98,9 +111,11 @@ export const JassGame = (state: State) => {
         <SockJsClient url='http://localhost:8080/ws' topics={['/game/request-action']} onMessage={onRequestNextAction} ref={ref}/>
         <SockJsClient url='http://localhost:8080/ws' topics={['/game/state']} onMessage={onGameStateUpdate} ref={ref}/>
 
+        <h1>Speed</h1>
+        <Slider value={state.speed} tooltipVisible onChange={changeSpeed} />
         {gameStateView}
 
-        <button onClick={connect}>Run</button>
+        <button onClick={createNewGame}>Run</button>
     </div>
 
 }

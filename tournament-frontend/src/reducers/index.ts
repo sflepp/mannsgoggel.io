@@ -2,10 +2,6 @@ import { Action } from '../actions';
 import { CodeExecutionResult } from '../services/CodeExecutionWebWorker';
 
 export interface State {
-    articles: {
-        id: string;
-        title: string;
-    }[];
     nextAction: string;
     gameState: GameState;
     actionRequest?: RemoteActionRequest;
@@ -13,19 +9,12 @@ export interface State {
     editor: CodeEditorState;
     codeTest: CodeTestState;
     flow: Flow;
+    speed: number;
 }
 
 export interface CodeTestState {
     status: 'RUNNING' | 'DONE';
     results: CodeExecutionResult[];
-}
-
-export interface CodeRunResult {
-    description: string;
-    fn: string;
-    result?: string;
-    error?: string;
-    consoleOutput?: string[];
 }
 
 export interface CodeEditorState {
@@ -45,6 +34,7 @@ export interface RemoteActionRequest {
 }
 
 export interface GameState {
+    playerName: string;
     revision: number;
     nextAction: string;
     nextPlayer: string;
@@ -75,14 +65,12 @@ export interface Card {
 }
 
 const initialState: State = {
-    articles: [
-        { id: 'adf', title: 'asf' }
-    ],
     nextAction: '',
     gameState: null,
     flow: {
         currentStep: 0,
     },
+    speed: 80,
     codeTest: {
         status: 'DONE',
         results: []
@@ -143,6 +131,13 @@ function playCard(handCards, playableCards, tableStack, gameState) {
 
 function rootReducer(state: State = initialState, action: Action): State {
     switch (action.type) {
+        case 'SET_SPEED':
+            return {
+                ...state,
+                ...{
+                    speed: action.payload
+                }
+            }
         case 'CODE_TEST_REQUEST':
             return {
                 ...state,
@@ -187,13 +182,6 @@ function rootReducer(state: State = initialState, action: Action): State {
                 ...state,
                 ...{ gameState: action.payload }
 
-            };
-        case 'ADD_ARTICLE':
-            return {
-                ...state,
-                ...{
-                    articles: state.articles.concat(action.payload)
-                }
             };
         case 'UPDATE_CODE':
             return {
