@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @Data
 @Builder(toBuilder = true)
 public class GameState implements Cloneable {
+    private final String playerName;
     private final Integer revision;
     private final JassActions.ActionType nextAction;
     private final String nextPlayer;
@@ -30,7 +31,7 @@ public class GameState implements Cloneable {
     }
 
     public boolean queryGameEnded() {
-        return teams.stream().anyMatch(team -> team.getPoints() > 1500);
+        return teams.stream().anyMatch(team -> team.getPoints() > 300);
     }
 
     public String queryPlayerByName(String playerName) {
@@ -58,6 +59,7 @@ public class GameState implements Cloneable {
 
     public static GameState toPlayerView(GameState state, String player) {
         return state.toBuilder()
+                .playerName(player)
                 .cards(state.getCards() == null ? null : map(state.getCards(), c -> c.toPlayerView(player)))
                 .build();
     }

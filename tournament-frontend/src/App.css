@@ -18,37 +18,44 @@
   padding-top: 140%;
 }
 
-.table-stack {
+.hand,
+.stack {
   position: relative;
-  height: 250px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.table-stack .card {
+.hand .card,
+.stack .card {
+  position: relative;
+}
+
+.hand .card-wrapper,
+.stack .card-wrapper {
   position: absolute;
 }
 
-.table-stack .card:nth-child(2) {
-  top: 30px;
-  left: 20px;
-}
-
-.table-stack .card:nth-child(3) {
-  top: 60px;
-  left: 40px;
-}
-
-.table-stack .card:nth-child(4) {
-  top: 90px;
-  left: 60px;
-}
-
-.player-hand {
+.jass-table {
+  width: 80%;
+  background-size: cover;
+  background-position: 50% 50%;
   position: relative;
-  height: 200px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.player-hand .card-wrapper {
-  position: absolute;
+.jass-table .col {
+  width: 33.3%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-
+.jass-table .col:after {
+  display: block;
+  content: "";
+  padding-top: 100%;
+}

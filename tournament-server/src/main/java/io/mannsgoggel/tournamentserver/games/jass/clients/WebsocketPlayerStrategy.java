@@ -1,5 +1,6 @@
 package io.mannsgoggel.tournamentserver.games.jass.clients;
 
+import io.mannsgoggel.gamejass.domain.game.JassActions;
 import io.mannsgoggel.gamejass.domain.player.RemotePlayerStrategy;
 import io.mannsgoggel.gamejass.domain.action.RemoteAction;
 import io.mannsgoggel.gamejass.domain.action.RequestRemoteAction;
@@ -21,6 +22,10 @@ public class WebsocketPlayerStrategy implements RemotePlayerStrategy {
 
     @Override
     public void requestRemoteAction(RequestRemoteAction action) {
+        if (action.getAction().equals(JassActions.ActionType.PLAY_CARD)) {
+            System.out.println("debug");
+        }
+
         simpMessagingTemplate.convertAndSend("/game/request-action", action);
     }
 

@@ -1,5 +1,6 @@
 package io.mannsgoggel.gamejass.domain.game;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,11 +18,36 @@ public class Card {
     Suit suit;
 
     public enum Color {
-        HEARTHS, SPADES, DIAMONDS, CLUBS
+        HEARTHS("H"),
+        SPADES("S"),
+        DIAMONDS("D"),
+        CLUBS("C");
+
+        @JsonValue
+        public final String label;
+
+        Color(String label) {
+            this.label = label;
+        }
     }
 
     public enum Suit {
-        ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX
+        ACE("A"),
+        KING("K"),
+        QUEEN("Q"),
+        JACK("J"),
+        TEN("10"),
+        NINE("9"),
+        EIGHT("8"),
+        SEVEN("7"),
+        SIX("6");
+
+        @JsonValue
+        public final String label;
+
+        Suit(String label) {
+            this.label = label;
+        }
     }
 
     public static class CardDeckBuilder {
