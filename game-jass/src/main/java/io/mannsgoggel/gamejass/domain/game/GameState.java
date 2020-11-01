@@ -31,7 +31,7 @@ public class GameState implements Cloneable {
     }
 
     public boolean queryGameEnded() {
-        return teams.stream().anyMatch(team -> team.getPoints() > 300);
+        return teams.stream().anyMatch(team -> team.getPoints() > 1500);
     }
 
     public String queryPlayerByName(String playerName) {

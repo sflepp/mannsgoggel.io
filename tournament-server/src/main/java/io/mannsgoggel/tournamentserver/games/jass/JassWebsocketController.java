@@ -13,7 +13,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -21,9 +23,7 @@ import java.util.UUID;
 public class JassWebsocketController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-
-    private JassGame jassGame;
-    private RemotePlayer player;
+    private final Map<String, RemotePlayer> players = new HashMap<>();
 
     public JassWebsocketController(SimpMessagingTemplate simpMessagingTemplate) {
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -31,11 +31,11 @@ public class JassWebsocketController {
 
     @MessageMapping("/jass/new-game")
     public void greeting(Principal principal, HelloMessage message) {
-        System.out.println(message + " " + principal.toString());
+        RemotePlayer player = new RemotePlayer(principal.getName(), new WebsocketPlayerStrategy(principal.getName(), simpMessagingTemplate));
 
-        player = new RemotePlayer(principal.getName(), new WebsocketPlayerStrategy(simpMessagingTemplate));
+        players.put(principal.getName(), player);
 
-        jassGame = new JassGame(
+        JassGame jassGame = new JassGame(
                 List.of(
                         player,
                         new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy()),
@@ -49,6 +49,6 @@ public class JassWebsocketController {
 
     @MessageMapping("/jass/action")
     public void action(Principal principal, RemoteAction action) {
-        player.onRemoteAction(action);
+        players.get(principal.getName()).onRemoteAction(action);
     }
 }

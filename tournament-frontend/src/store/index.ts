@@ -1,7 +1,7 @@
 import { applyMiddleware, compose, createStore } from 'redux';
 import rootReducer from '../reducers/index';
 import createSagaMiddleware from 'redux-saga'
-import { calculateSaga, sendActionSaga } from '../components/JassGame/JassGame';
+import { calculateSaga, handleBackpressure, newGameSaga, sendActionSaga } from '../components/JassGame/JassGame';
 import { runTestsSaga } from '../components/CodeEditor/CodeTestRunner';
 
 declare global {
@@ -19,9 +19,11 @@ const store = createStore(
     composeEnhancers(applyMiddleware(sagaMiddleware))
 );
 
+sagaMiddleware.run(newGameSaga);
 sagaMiddleware.run(calculateSaga);
 sagaMiddleware.run(sendActionSaga);
 sagaMiddleware.run(runTestsSaga);
+sagaMiddleware.run(handleBackpressure);
 
 
 export default store;

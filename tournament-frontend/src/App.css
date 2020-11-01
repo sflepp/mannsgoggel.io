@@ -7,9 +7,13 @@
 
 .card {
   position: relative;
-  width: 100px;
+  width: 70px;
   background-size: contain;
-  background-position: 0% 0%;
+  background-position: 0 0;
+}
+
+.card.unknown {
+  background-size: 70px 98px;
 }
 
 .card::after {
@@ -38,12 +42,14 @@
 }
 
 .jass-table {
-  width: 80%;
+  width: 600px;
   background-size: cover;
   background-position: 50% 50%;
   position: relative;
   display: flex;
   flex-wrap: wrap;
+  border-radius: 60px;
+  border: 3px solid black;
 }
 
 .jass-table .col {

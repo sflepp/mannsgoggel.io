@@ -12,6 +12,11 @@ export interface State {
     speed: number;
 }
 
+export interface WebsocketMessage {
+    messageType: 'state' | 'action-request';
+    payload: GameState | RemoteActionRequest;
+}
+
 export interface CodeTestState {
     status: 'RUNNING' | 'DONE';
     results: CodeExecutionResult[];
@@ -70,7 +75,7 @@ const initialState: State = {
     flow: {
         currentStep: 0,
     },
-    speed: 80,
+    speed: 100,
     codeTest: {
         status: 'DONE',
         results: []

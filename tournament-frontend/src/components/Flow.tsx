@@ -28,17 +28,6 @@ const Flow = (state: State) => {
         <div>Submit</div>
     ]
 
-    const affixTextFlow = [
-        'Play Game',
-        'Submit'
-    ]
-
-    let disabled = false;
-
-    if (step === 0) {
-        disabled = state.codeTest.results.map(e => e.error !== undefined).reduce((a, b) => a || b, false);
-    }
-
     return (
         <div>
             <Steps current={state.flow.currentStep} onChange={setFlowStep}>
@@ -47,20 +36,7 @@ const Flow = (state: State) => {
                 <Step title="Submit" description="Submit your strategy"/>
             </Steps>
 
-            {step <= 2 && <>
-                <br/>
-                <div style={{ textAlign: 'right' }}>
-                    <Affix offsetTop={16}>
-                        {(state.flow.currentStep === 0 && <CodeTestRunner/>)}
-                        <Button disabled={disabled} type="primary"
-                                onClick={() => setFlowStep(state.flow.currentStep + 1)}>
-                            {affixTextFlow[step]}
-                        </Button>
-                    </Affix>
-                </div>
-
-                <br/>
-            </>}
+            <br />
 
             {contentFlow[step]}
         </div>

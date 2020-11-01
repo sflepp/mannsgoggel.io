@@ -9,43 +9,54 @@ const mapStateToProps = (state: State) => {
 }
 
 export const GameStateView = (state: GameState) => {
-
-    const otherPlayers = state.teams.flatMap(t => t.players).filter(p => p !== state.playerName);
-
-    return <div className={'jass-table'} style={{ backgroundImage: 'url("cards/jass_table.png")' }}>
-        <div className={'col'} style={{color: 'white'}}>
-            <TeamStack gameState={state} team={state.teams[0].name}/>
-        </div>
+    return <div className={'jass-table'} style={{ backgroundImage: 'url("fabric.jpg")' }}>
         <div className={'col'}>
-            <div style={{ transform: 'rotate(180deg)' }}><OtherPlayerCards gameState={state} player={otherPlayers[1]}/>
+            <div style={{ color: 'white' }}>
+                <p><b>Team 1 (you):</b><br/>
+                    <span>Points: {state.teams[0].points}</span>
+                </p>
+                <p>
+                    <b>Team 2:</b><br/>
+                    <span>Points: {state.teams[1].points}</span>
+                </p>
+                <p>
+                    <b>Trump</b><br />
+                    <span>{state.playingMode?.replace('TRUMP_', '').replace('_', ' ')}</span>
+                </p>
             </div>
         </div>
-        <div className={'col'}></div>
-
         <div className={'col'}>
-            <div style={{ transform: 'rotate(90deg)' }}>
-                <OtherPlayerCards gameState={state} player={otherPlayers[2]}/>
-            </div>
-        </div>
-        <div className={'col'}>
-            <div>
-                <TableStack gameState={state}/>
+            <div style={{ transform: 'rotate(180deg)' }}>
+                <OtherPlayerCards gameState={state} player={state.teams[0].players[1]}/>
             </div>
         </div>
         <div className={'col'}>
             <div style={{ transform: 'rotate(-90deg)' }}>
-                <OtherPlayerCards gameState={state} player={otherPlayers[0]}/>
+                <TeamStack gameState={state} team={state.teams[1]}/>
             </div>
         </div>
 
-        <div className={'col'}></div>
+        <div className={'col'}>
+            <div style={{ transform: 'rotate(90deg)' }}>
+                <OtherPlayerCards gameState={state} player={state.teams[1].players[1]}/>
+            </div>
+        </div>
+        <div className={'col'}>
+            <div><TableStack gameState={state}/></div>
+        </div>
+        <div className={'col'}>
+            <div style={{ transform: 'rotate(-90deg)' }}>
+                <OtherPlayerCards gameState={state} player={state.teams[1].players[0]}/>
+            </div>
+        </div>
+        <div className={'col'}/>
         <div className={'col'}>
             <div>
                 <PlayerCards gameState={state}/>
             </div>
         </div>
         <div className={'col'}>
-            <TeamStack gameState={state} team={state.teams[1].name}/>
+            <TeamStack gameState={state} team={state.teams[0]}/>
         </div>
     </div>;
 }
