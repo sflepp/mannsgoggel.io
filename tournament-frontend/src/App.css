@@ -42,7 +42,8 @@
 }
 
 .jass-table {
-  width: 600px;
+  margin-top: 20px;
+  width: 100%;
   background-size: cover;
   background-position: 50% 50%;
   position: relative;

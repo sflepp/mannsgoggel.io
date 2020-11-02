@@ -1,12 +1,11 @@
 import { State } from '../reducers';
-import { Affix, Button, Steps } from 'antd';
+import { Steps } from 'antd';
 import React from 'react';
 import { connect } from 'react-redux';
 import { setNextFlowStep } from '../actions';
 import store from '../store';
 import JassGame from './JassGame/JassGame';
 import CodeEditor from './CodeEditor/CodeEditor';
-import CodeTestRunner from './CodeEditor/CodeTestRunner';
 
 const { Step } = Steps;
 

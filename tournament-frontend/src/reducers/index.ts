@@ -7,9 +7,9 @@ export interface State {
     actionRequest?: RemoteActionRequest;
     actionResult?: CodeExecutionResult;
     editor: CodeEditorState;
+    debugger: GameDebuggerState;
     codeTest: CodeTestState;
     flow: Flow;
-    speed: number;
 }
 
 export interface WebsocketMessage {
@@ -24,6 +24,14 @@ export interface CodeTestState {
 
 export interface CodeEditorState {
     playerCode: string;
+}
+
+export interface GameDebuggerState {
+    speed: number;
+    stateFilter: 'ALL' | 'PLAYER_ONLY';
+    pauseOnTurn: boolean;
+    renderGameState: boolean;
+    paused: boolean;
 }
 
 export interface Flow {
@@ -75,7 +83,13 @@ const initialState: State = {
     flow: {
         currentStep: 0,
     },
-    speed: 100,
+    debugger: !!localStorage.getItem('debugger_settings') ? JSON.parse(localStorage.getItem('debugger_settings')) : {
+        speed: 100,
+        stateFilter: 'ALL',
+        renderGameState: true,
+        pauseOnTurn: true,
+        paused: false,
+    },
     codeTest: {
         status: 'DONE',
         results: []
@@ -136,13 +150,27 @@ function playCard(handCards, playableCards, tableStack, gameState) {
 
 function rootReducer(state: State = initialState, action: Action): State {
     switch (action.type) {
-        case 'SET_SPEED':
+        case 'SET_PAUSED':
             return {
                 ...state,
                 ...{
-                    speed: action.payload
+                    debugger: {
+                        ...state.debugger,
+                        ...{ paused: action.payload }
+                    }
                 }
-            }
+            };
+        case 'RUN_NEW_GAME':
+            break;
+        case 'QUEUE_WEBSOCKET_MESSAGE':
+            break;
+        case 'SET_DEBUGGER_SETTINGS':
+            return {
+                ...state,
+                ...{
+                    debugger: action.payload,
+                }
+            };
         case 'CODE_TEST_REQUEST':
             return {
                 ...state,
@@ -152,7 +180,7 @@ function rootReducer(state: State = initialState, action: Action): State {
                         results: []
                     }
                 }
-            }
+            };
         case 'CODE_TEST_RESULT':
             return {
                 ...state,
@@ -162,7 +190,7 @@ function rootReducer(state: State = initialState, action: Action): State {
                         results: action.payload
                     }
                 }
-            }
+            };
         case 'SET_NEXT_FLOW_STEP':
             return {
                 ...state,
@@ -176,12 +204,12 @@ function rootReducer(state: State = initialState, action: Action): State {
             return {
                 ...state,
                 ...{ actionRequest: action.payload },
-            }
+            };
         case 'SET_ACTION_RESULT':
             return {
                 ...state,
                 ...{ actionResult: action.payload },
-            }
+            };
         case 'UPDATE_GAME_STATE':
             return {
                 ...state,
@@ -196,7 +224,7 @@ function rootReducer(state: State = initialState, action: Action): State {
                         playerCode: action.payload
                     }
                 }
-            }
+            };
         case 'SET_CODE_ERROR':
             return {
                 ...state,
@@ -208,7 +236,7 @@ function rootReducer(state: State = initialState, action: Action): State {
                         }
                     }
                 }
-            }
+            };
     }
     return state;
 }

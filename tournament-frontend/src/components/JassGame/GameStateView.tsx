@@ -8,22 +8,14 @@ const mapStateToProps = (state: State) => {
     return state.gameState;
 }
 
+let i = 0;
+
 export const GameStateView = (state: GameState) => {
+    i++;
+    console.log(i);
     return <div className={'jass-table'} style={{ backgroundImage: 'url("fabric.jpg")' }}>
         <div className={'col'}>
-            <div style={{ color: 'white' }}>
-                <p><b>Team 1 (you):</b><br/>
-                    <span>Points: {state.teams[0].points}</span>
-                </p>
-                <p>
-                    <b>Team 2:</b><br/>
-                    <span>Points: {state.teams[1].points}</span>
-                </p>
-                <p>
-                    <b>Trump</b><br />
-                    <span>{state.playingMode?.replace('TRUMP_', '').replace('_', ' ')}</span>
-                </p>
-            </div>
+            <div/>
         </div>
         <div className={'col'}>
             <div style={{ transform: 'rotate(180deg)' }}>

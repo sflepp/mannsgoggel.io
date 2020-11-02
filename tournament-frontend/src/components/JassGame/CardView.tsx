@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardState, GameState, Team } from '../../reducers';
+import { Card, GameState, Team } from '../../reducers';
 
 export const TeamStack = (props: { gameState: GameState, team: Team }) => {
     const teamCards = props.gameState.cards.filter(c => c.team === props.team.name);
@@ -64,7 +64,6 @@ export const OtherPlayerCards = (props: { gameState: GameState, player: string }
         }
     </div>
 }
-
 
 export const PlayerCards = (props: { gameState: GameState }) => {
     const handCards = props.gameState.cards

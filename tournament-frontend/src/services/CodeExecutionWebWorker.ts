@@ -14,7 +14,23 @@ export interface CodeExecutionResult {
     error?: string
 }
 
-export function codeExecutionWorker(code: string, functions: CodeExecutionDescription[]): Promise<CodeExecutionResult[]> {
+interface WorkerHolder { url: string, worker: Worker };
+
+const cache: WorkerHolder[] = [];
+
+const hashCode = (s: string) => {
+    return s.split("").reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a
+    }, 0);
+}
+
+const createWorker = (code: string): WorkerHolder => {
+    const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }))
+    return { url: blobUrl, worker: new Worker(blobUrl) };
+}
+
+export function codeExecutionWorker(code: string, functions: CodeExecutionDescription[], useCache: boolean = false): Promise<CodeExecutionResult[]> {
     return new Promise((resolve: (value: CodeExecutionResult[]) => void, reject) => {
         const workerJavascript = `${code}
         var logFn = console.log;
@@ -24,7 +40,7 @@ export function codeExecutionWorker(code: string, functions: CodeExecutionDescri
                     var log = [];
         
                     console.log = (...args) => {
-                        log.push(args.map(e => JSON.stringify(e)).join(', '));
+                        log.push(JSON.stringify(args));
                         logFn('worker', ...args);
                     }
                     
@@ -42,12 +58,22 @@ export function codeExecutionWorker(code: string, functions: CodeExecutionDescri
             );
         }, false);`;
 
-        const blobUrl = URL.createObjectURL(new Blob([workerJavascript], { type: 'text/javascript' }));
+        let workerHolder: WorkerHolder;
 
-        const worker = new Worker(blobUrl);
+        if (useCache) {
+            const hash = hashCode(workerJavascript);
+
+            if (cache[hash] === undefined) {
+                cache[hash] = createWorker(workerJavascript);
+            }
+
+            workerHolder = cache[hash];
+        } else {
+            workerHolder = createWorker(workerJavascript);
+        }
 
         const timeout = setTimeout(() => {
-            worker.terminate();
+            kill();
             resolve([{
                 description: 'Timeout: Your code is too slow and timed out after ' + TIMEOUT + ' ms',
                 fn: '',
@@ -57,22 +83,24 @@ export function codeExecutionWorker(code: string, functions: CodeExecutionDescri
         }, TIMEOUT);
 
         const kill = () => {
-            clearTimeout(timeout);
-            worker.terminate();
-            URL.revokeObjectURL(blobUrl);
+            if (!useCache) {
+                clearTimeout(timeout);
+                workerHolder.worker.terminate();
+                URL.revokeObjectURL(workerHolder.url);
+            }
         }
 
-        worker.onmessage = (event) => {
+        workerHolder.worker.onmessage = (event) => {
             kill();
             resolve(event.data as CodeExecutionResult[]);
         }
-        worker.onerror = (error) => {
+        workerHolder.worker.onerror = (error) => {
             kill();
             if (error.message !== undefined) {
                 reject(error);
             }
         }
-        worker.postMessage({
+        workerHolder.worker.postMessage({
             functions: functions
         });
     });

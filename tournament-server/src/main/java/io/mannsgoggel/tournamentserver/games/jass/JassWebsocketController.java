@@ -6,7 +6,7 @@ import io.mannsgoggel.gamejass.domain.player.LocalPlayer;
 import io.mannsgoggel.gamejass.domain.player.RemotePlayer;
 import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.clients.WebsocketPlayerStrategy;
-import io.mannsgoggel.tournamentserver.games.jass.dto.HelloMessage;
+import io.mannsgoggel.tournamentserver.games.jass.dto.GameOptions;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -30,8 +30,8 @@ public class JassWebsocketController {
     }
 
     @MessageMapping("/jass/new-game")
-    public void greeting(Principal principal, HelloMessage message) {
-        RemotePlayer player = new RemotePlayer(principal.getName(), new WebsocketPlayerStrategy(principal.getName(), simpMessagingTemplate));
+    public void greeting(Principal principal, GameOptions message) {
+        RemotePlayer player = new RemotePlayer(principal.getName(), new WebsocketPlayerStrategy(principal.getName(), simpMessagingTemplate, message.getFilter()));
 
         players.put(principal.getName(), player);
 

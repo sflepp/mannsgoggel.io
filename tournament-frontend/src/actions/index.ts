@@ -1,5 +1,5 @@
 import { CodeExecutionResult } from '../services/CodeExecutionWebWorker';
-import { WebsocketMessage } from "../reducers";
+import { GameDebuggerState, WebsocketMessage } from "../reducers";
 
 export type ActionType =
     'RUN_NEW_GAME'
@@ -11,8 +11,9 @@ export type ActionType =
     | 'SET_NEXT_FLOW_STEP'
     | 'CODE_TEST_REQUEST'
     | 'CODE_TEST_RESULT'
-    | 'SET_SPEED'
-    | 'QUEUE_WEBSOCKET_MESSAGE';
+    | 'QUEUE_WEBSOCKET_MESSAGE'
+    | 'SET_DEBUGGER_SETTINGS'
+    | 'SET_PAUSED';
 
 export interface Action {
     type: ActionType;
@@ -55,10 +56,15 @@ export function codeTestResult(payload: CodeExecutionResult[]): Action {
     return { type: 'CODE_TEST_RESULT', payload: payload }
 }
 
-export function updateSpeed(payload: number): Action {
-    return { type: 'SET_SPEED', payload: payload }
-}
-
 export function queueWebsocketMessage(payload: WebsocketMessage): Action {
     return { type: 'QUEUE_WEBSOCKET_MESSAGE', payload: payload }
+}
+
+export function setDebuggerSettings(payload: GameDebuggerState): Action {
+    localStorage.setItem('debugger_settings', JSON.stringify(payload));
+    return { type: 'SET_DEBUGGER_SETTINGS', payload: payload }
+}
+
+export function setPaused(payload: boolean): Action {
+    return { type: 'SET_PAUSED', payload: payload }
 }
