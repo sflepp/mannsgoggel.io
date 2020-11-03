@@ -1,15 +1,9 @@
 import React from 'react';
 import './App.css';
-import { Breadcrumb, Layout, Menu} from 'antd';
-import {
-    LaptopOutlined,
-    NotificationOutlined,
-    UserOutlined
-} from '@ant-design/icons';
+import { Breadcrumb, Layout, Menu } from 'antd';
 import Flow from './components/Flow';
 
-const { SubMenu } = Menu;
-const { Header, Content, Sider } = Layout;
+const { Header, Content} = Layout;
 
 function App() {
     return (

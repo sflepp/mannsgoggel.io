@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardState, GameState, Team } from '../../reducers';
+import { Card, CardState, Team } from '../../reducers';
 
 export const TeamStack = (props: { cards: CardState[], team: Team }) => {
     const teamCards = props.cards.filter(c => c.team === props.team.name);
@@ -69,7 +69,7 @@ export const PlayerCards = (props: { cards: CardState[], playerName: string, nex
     const handCards = props.cards
         .filter(s => s.player === props.playerName && s.playOrder === undefined)
         .sort((a, b) => a.points - b.points)
-        .sort((a, b) => a.card.suit < b.card.suit ? 1 : -1)
+        .sort((a, b) => a.card.suit < b.card.suit ? 1 : -1);
 
     const handCardCount = handCards.length;
 
@@ -98,7 +98,7 @@ export const UnknownCardView = () => {
 export const CardView = (props: { card: Card, top?: string}) => {
     return <div className={'card'} style={{
         top: typeof props.top === 'string' ? props.top: '0px',
-        backgroundImage: `url(./cards/${props.card.suit}${props.card.color}.svg)`,
+        backgroundImage: `url(./cards/${props.card.suit}_${props.card.color}.svg)`,
     }}>
     </div>
 }

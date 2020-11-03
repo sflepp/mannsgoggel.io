@@ -70,7 +70,30 @@
 
 
 
-
+/*
 .react-json-view .icon-container {
   display: none !important;
+} */
+
+/*
+.react-json-view .object-key-val {
+  display: inline-block !important;
+} */
+
+.react-json-view .icon-container {
+  position: relative;
+  top: 3px;
+}
+
+.react-json-view .expanded-icon {
+  position: relative;
+  top: 3px;
+}
+
+/* .react-json-view .icon-container + span {
+  display: none !important;
+} */
+
+.react-json-view .node-ellipsis {
+  font-size: 12px !important;
 }

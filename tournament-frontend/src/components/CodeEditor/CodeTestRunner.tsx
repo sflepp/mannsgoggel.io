@@ -28,7 +28,7 @@ export function* runTestsSaga() {
                 },
                 {
                     description: 'choosePlayingMode() should return valid playing mode',
-                    fn: `['TOP_DOWN', 'BOTTOM_UP', 'TRUMP_HEARTHS', 'TRUMP_SPADES', 'TRUMP_DIAMONDS', 'TRUMP_CLUBS'].includes(choosePlayingMode([], {}))`
+                    fn: `['TOP_DOWN', 'BOTTOM_UP', 'TRUMP_HEARTS', 'TRUMP_SPADES', 'TRUMP_DIAMONDS', 'TRUMP_CLUBS'].includes(choosePlayingMode([], {}))`
                 }
             ];
 
@@ -36,7 +36,6 @@ export function* runTestsSaga() {
 
             for (var i = 0; i < tests.length; i++) {
                 const currentTestResults = (yield select((state: State) => state.codeTest.results));
-                console.log(currentTestResults);
                 yield put(codeTestResult([
                     ...currentTestResults,
                     (yield call(codeExecutionWorker, action.payload, tests[i], true))

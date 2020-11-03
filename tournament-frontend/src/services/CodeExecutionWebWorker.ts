@@ -1,5 +1,3 @@
-import { Props } from 'react';
-
 const TIMEOUT = 1000;
 
 export interface CodeExecutionDescription {
@@ -11,9 +9,14 @@ export interface CodeExecutionResult {
     description: string,
     fn: string,
     executionTime: number,
-    consoleOutput?: string[],
+    consoleOutput?: ConsoleLog[],
     result?: string,
     error?: string
+}
+
+export interface ConsoleLog {
+    level: 'log' | 'error';
+    payload: any[];
 }
 
 interface WorkerHolder { url: string, worker: Worker };
@@ -36,11 +39,13 @@ export function codeExecutionWorker(code: string, execution: CodeExecutionDescri
     return new Promise((resolve: (value: CodeExecutionResult) => void) => {
         const workerJavascript = `${code}
         var logFn = console.log;
+        console.clear();
+        
         self.addEventListener('message', function(event) {
             var log = [];
         
             console.log = (...args) => {
-                log.push(JSON.stringify(args));
+                log.push({level: 'log', payload: args });
                 logFn('worker', ...args);
             }
         

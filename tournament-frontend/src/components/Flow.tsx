@@ -4,7 +4,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { setNextFlowStep } from '../actions';
 import store from '../store';
-import JassGame from './JassGame/JassGame';
 import CodeEditor from './CodeEditor/CodeEditor';
 
 const { Step } = Steps;
@@ -23,7 +22,7 @@ const Flow = (state: State) => {
 
     const contentFlow = [
         <CodeEditor/>,
-        <JassGame/>,
+        <div>asdf</div>,
         <div>Submit</div>
     ]
 

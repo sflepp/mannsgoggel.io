@@ -11,6 +11,7 @@ import store from '../../store';
 import { Affix, Col, message, Row } from 'antd';
 import CodeTestRunner from "./CodeTestRunner";
 import GameDebugger from './GameDebugger';
+import JassGame from "../JassGame/JassGame";
 // @ts-ignore
 
 const mapStateToProps = (state: State): CodeEditorState => {
@@ -39,9 +40,8 @@ const CodeEditor = (state: CodeEditorState) => {
         }
     });
 
-    console.log('editor render');
-
     return <div>
+        <JassGame/>
         <Row>
             <Col span={24}>
             </Col>

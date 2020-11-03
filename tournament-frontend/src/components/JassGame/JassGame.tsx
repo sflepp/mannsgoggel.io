@@ -1,6 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { GameState, RemoteActionRequest, State, WebsocketMessage } from '../../reducers';
+import { RemoteActionRequest, State, WebsocketMessage } from '../../reducers';
 // @ts-ignore
 import SockJsClient from 'react-stomp';
 import {
@@ -12,22 +11,8 @@ import {
     updateGameState
 } from '../../actions';
 import store from '../../store';
-import GameStateView from './GameStateView';
 import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { actionChannel, call, delay, put, select, take, takeEvery } from 'redux-saga/effects'
-import { Col, Row, Statistic } from 'antd';
-
-interface Props {
-    gameState: GameState,
-    renderView: boolean
-}
-
-const mapStateToProps = (state: State): Props => {
-    return {
-        gameState: state.gameState,
-        renderView: state.debugger.renderGameState
-    };
-};
 
 let webSocket: any;
 
@@ -94,16 +79,19 @@ export function* calculateSaga() {
     yield takeEvery('SET_ACTION_REQUEST', function* (action: Action) {
         const code = yield select((state: State) => state.editor.playerCode);
         const result = yield call(codeExecutionWorker, code, evaluateFunction(action.payload), true);
+        console.log(result);
         yield put(setResultCodeExecution(result))
     });
 }
 
 export function* sendActionSaga() {
     yield takeEvery('SET_ACTION_RESULT', (action: Action) => {
-        webSocket.sendMessage('/app/jass/action', JSON.stringify({
-            actionType: action.payload.description,
-            payload: JSON.parse(action.payload.result)
-        }));
+        if (action.payload.result !== undefined) {
+            webSocket.sendMessage('/app/jass/action', JSON.stringify({
+                actionType: action.payload.description,
+                payload: JSON.parse(action.payload.result)
+            }));
+        }
     })
 }
 
@@ -115,111 +103,9 @@ const onWebsocketMessage = (message: WebsocketMessage) => {
     store.dispatch(queueWebsocketMessage(message))
 }
 
-const mapNextActionToHumanReadable = (state: GameState) => {
-    switch (state.nextAction) {
-        case 'START_ROUND':
-            return 'Start round';
-        case 'DECIDE_SHIFT':
-            return 'Decide shift';
-        case 'SET_STARTING_PLAYER':
-            return 'Set starting player';
-        case 'SET_PLAYING_MODE':
-            return 'Choose playing mode';
-        case 'PLAY_CARD':
-            return 'Play card';
-        case 'START_GAME':
-            return 'Start game';
-        case 'HAND_OUT_CARDS':
-            return 'Hand out cards';
-        case 'START_STICH':
-            return 'Start stich';
-        case 'END_STICH':
-            return 'End stich';
-        case 'END_ROUND':
-            return 'End round';
-        case 'END_GAME':
-            return 'Game ended'
-        case 'EXIT':
-            return 'Game ended'
-        default:
-            return '';
-    }
+export const JassGame = () => {
+    return <SockJsClient url='http://localhost:8080/ws' topics={['/user/game']} onMessage={onWebsocketMessage}
+                         ref={ref}/>;
 }
 
-const mapPlayingModeToHumanReadable = (state: GameState) => {
-    switch (state.playingMode) {
-        case 'TOP_DOWN':
-            return 'Top down';
-        case 'BOTTOM_UP':
-            return 'Bottom up';
-        case 'TRUMP_SPADES':
-            return 'Spades';
-        case 'TRUMP_CLUBS':
-            return 'Clubs';
-        case 'TRUMP_HEARTHS':
-            return 'Hearths';
-        case 'TRUMP_DIAMOND':
-            return 'Diamond';
-        default:
-            return '-';
-    }
-}
-
-const mapPlayerToHumanReadable = (state: GameState) => {
-    const players = state.teams.flatMap(t => t.players);
-
-    switch (players.indexOf(state.nextPlayer)) {
-        case 0:
-            return 'Team 1 / You';
-        case 1:
-            return 'Team 1 / Player-2'
-        case 2:
-            return 'Team 2 / Player-3';
-        case 3:
-            return 'Team 2 / Player-4';
-        default:
-            return '-';
-    }
-}
-
-export const JassGame = (state: Props) => {
-    const gameStateView = state.gameState ? (
-        <div>
-            <Row>
-                <Col span={12}>
-                    <Statistic title="Points Team 1 (you)" value={state.gameState.teams[0].points}/>
-                </Col>
-                <Col span={12}>
-                    <Statistic title="Points Team 2" value={state.gameState.teams[1].points}/>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col span={12}>
-                    <Statistic title="Next action" value={mapNextActionToHumanReadable(state.gameState)}/>
-                </Col>
-                <Col span={12}>
-                    <Statistic title="Next player" value={mapPlayerToHumanReadable(state.gameState)}/>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col span={12}>
-                    <Statistic title="Trump" value={mapPlayingModeToHumanReadable(state.gameState)}/>
-                </Col>
-                <Col span={12}>
-                    <Statistic title="Step" value={state.gameState.revision}/>
-                </Col>
-            </Row>
-
-            {state.gameState.nextAction !== 'EXIT' && state.renderView && <GameStateView/>}
-        </div>
-    ) : <></>;
-
-    return <div>
-        <SockJsClient url='http://localhost:8080/ws' topics={['/user/game']} onMessage={onWebsocketMessage} ref={ref}/>
-        {gameStateView}
-    </div>
-}
-
-export default connect(mapStateToProps)(JassGame);
+export default JassGame;

@@ -111,14 +111,14 @@ function decideShift(handCards, gameState) {
 /**
  * This function chooses a playing mode. Following playing modes are valid:
  * 
- * TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
+ * TOP_DOWN, BOTTOM_UP, TRUMP_HEARTS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
  *
  * @param {object[]} handCards  The cards in the players hands
  * @param {object} gameState    The current state of the game
  * @returns {string}            The playing mode for this round
  */
 function choosePlayingMode(handCards, gameState) {
-    return 'TRUMP_HEARTHS';
+    return 'TRUMP_HEARTS';
 }
 
 /**
@@ -142,6 +142,11 @@ function startStich(handCards, gameState) {
  * @returns {object}                The card to play
  */
 function playCard(handCards, playableCards, tableStack, gameState) {
+    console.log('handCards', handCards);
+    console.log('playableCards', playableCards);
+    console.log('tableStack', tableStack);
+    console.log('gameState', gameState);
+    
     return playableCards[0];
 }
 `

@@ -20,7 +20,7 @@ public interface GameMode {
     Boolean isTrump(Card card);
 
     enum PlayingMode {
-        TOP_DOWN, BOTTOM_UP, TRUMP_HEARTHS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
+        TOP_DOWN, BOTTOM_UP, TRUMP_HEARTS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
     }
 
     class Builder {
@@ -28,7 +28,7 @@ public interface GameMode {
             return switch (mode) {
                 case BOTTOM_UP -> new GameMode.BottomUp();
                 case TOP_DOWN -> new GameMode.TopDown();
-                case TRUMP_HEARTHS -> new GameMode.Trump(Card.Color.HEARTHS);
+                case TRUMP_HEARTS -> new GameMode.Trump(Card.Color.HEARTS);
                 case TRUMP_SPADES -> new GameMode.Trump(Card.Color.SPADES);
                 case TRUMP_DIAMONDS -> new GameMode.Trump(Card.Color.DIAMONDS);
                 case TRUMP_CLUBS -> new GameMode.Trump(Card.Color.CLUBS);
