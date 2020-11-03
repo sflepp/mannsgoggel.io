@@ -66,3 +66,11 @@
   content: "";
   padding-top: 100%;
 }
+
+
+
+
+
+.react-json-view .icon-container {
+  display: none !important;
+}

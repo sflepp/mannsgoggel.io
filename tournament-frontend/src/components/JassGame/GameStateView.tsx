@@ -8,47 +8,43 @@ const mapStateToProps = (state: State) => {
     return state.gameState;
 }
 
-let i = 0;
-
 export const GameStateView = (state: GameState) => {
-    i++;
-    console.log(i);
     return <div className={'jass-table'} style={{ backgroundImage: 'url("fabric.jpg")' }}>
         <div className={'col'}>
             <div/>
         </div>
         <div className={'col'}>
             <div style={{ transform: 'rotate(180deg)' }}>
-                <OtherPlayerCards gameState={state} player={state.teams[0].players[1]}/>
+                <OtherPlayerCards cards={state.cards} player={state.teams[0].players[1]} nextPlayer={state.nextPlayer}/>
             </div>
         </div>
         <div className={'col'}>
             <div style={{ transform: 'rotate(-90deg)' }}>
-                <TeamStack gameState={state} team={state.teams[1]}/>
+                <TeamStack cards={state.cards} team={state.teams[1]}/>
             </div>
         </div>
 
         <div className={'col'}>
             <div style={{ transform: 'rotate(90deg)' }}>
-                <OtherPlayerCards gameState={state} player={state.teams[1].players[1]}/>
+                <OtherPlayerCards cards={state.cards} player={state.teams[1].players[1]} nextPlayer={state.nextPlayer}/>
             </div>
         </div>
         <div className={'col'}>
-            <div><TableStack gameState={state}/></div>
+            <div><TableStack cards={state.cards} nextPlayer={state.nextPlayer} teams={state.teams}/></div>
         </div>
         <div className={'col'}>
             <div style={{ transform: 'rotate(-90deg)' }}>
-                <OtherPlayerCards gameState={state} player={state.teams[1].players[0]}/>
+                <OtherPlayerCards cards={state.cards} player={state.teams[1].players[0]} nextPlayer={state.nextPlayer}/>
             </div>
         </div>
         <div className={'col'}/>
         <div className={'col'}>
             <div>
-                <PlayerCards gameState={state}/>
+                <PlayerCards cards={state.cards} nextPlayer={state.nextPlayer} playerName={state.playerName}/>
             </div>
         </div>
         <div className={'col'}>
-            <TeamStack gameState={state} team={state.teams[0]}/>
+            <TeamStack cards={state.cards} team={state.teams[0]}/>
         </div>
     </div>;
 }

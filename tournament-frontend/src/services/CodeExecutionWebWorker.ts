@@ -1,3 +1,5 @@
+import { Props } from 'react';
+
 const TIMEOUT = 1000;
 
 export interface CodeExecutionDescription {
@@ -16,7 +18,7 @@ export interface CodeExecutionResult {
 
 interface WorkerHolder { url: string, worker: Worker };
 
-const cache: WorkerHolder[] = [];
+const cache = new Map<number, WorkerHolder>();
 
 const hashCode = (s: string) => {
     return s.split("").reduce((a, b) => {
@@ -30,78 +32,96 @@ const createWorker = (code: string): WorkerHolder => {
     return { url: blobUrl, worker: new Worker(blobUrl) };
 }
 
-export function codeExecutionWorker(code: string, functions: CodeExecutionDescription[], useCache: boolean = false): Promise<CodeExecutionResult[]> {
-    return new Promise((resolve: (value: CodeExecutionResult[]) => void, reject) => {
+export function codeExecutionWorker(code: string, execution: CodeExecutionDescription, useCache: boolean = false): Promise<CodeExecutionResult> {
+    return new Promise((resolve: (value: CodeExecutionResult) => void) => {
         const workerJavascript = `${code}
         var logFn = console.log;
         self.addEventListener('message', function(event) {
-            self.postMessage(
-                event.data.functions.map(test => {
-                    var log = [];
+            var log = [];
         
-                    console.log = (...args) => {
-                        log.push(JSON.stringify(args));
-                        logFn('worker', ...args);
-                    }
-                    
-                    var t0 = performance.now()
-                    var result = eval(test.fn);
-                    var t1 = performance.now()
-                    
-                    try {
-                        return { description: test.description, fn: test.fn, result: JSON.stringify(result), consoleOutput: log, executionTime: parseInt(t1 - t0) }
-                    } catch (e) {
-                        var t1 = performance.now()
-                        return { description: test.description, fn: test.fn, error: JSON.stringify(e), consoleOutput: log, executionTime: parseInt(t1 - t0) }
-                    }
-                })
-            );
+            console.log = (...args) => {
+                log.push(JSON.stringify(args));
+                logFn('worker', ...args);
+            }
+        
+            var t0 = performance.now()
+            var result = eval(event.data.fn);
+            var t1 = performance.now()
+        
+            let execution;
+            try {
+                execution = { description: event.data.description, fn: event.data.fn, result: JSON.stringify(result), consoleOutput: log, executionTime: parseInt(t1 - t0) }
+            } catch (e) {
+                var t1 = performance.now()
+                execution = { description: event.data.description, fn: event.data.fn, error: JSON.stringify(e), consoleOutput: log, executionTime: parseInt(t1 - t0) }
+            }
+        
+            self.postMessage(execution);
         }, false);`;
 
         let workerHolder: WorkerHolder;
+        let hash: number;
 
         if (useCache) {
             const hash = hashCode(workerJavascript);
 
-            if (cache[hash] === undefined) {
-                cache[hash] = createWorker(workerJavascript);
+            if (!cache.has(hash)) {
+                cache.set(hash, createWorker(workerJavascript));
             }
 
-            workerHolder = cache[hash];
+            workerHolder = cache.get(hash);
         } else {
             workerHolder = createWorker(workerJavascript);
         }
 
         const timeout = setTimeout(() => {
-            kill();
-            resolve([{
-                description: 'Timeout: Your code is too slow and timed out after ' + TIMEOUT + ' ms',
-                fn: '',
-                executionTime: TIMEOUT,
-                error: 'Your code is too slow and timed out after ' + TIMEOUT + ' ms'
-            }]);
+            forceKill();
+            resolve({
+                ...execution,
+                ...{
+                    value: null,
+                    error: JSON.stringify({message: 'Your code is too slow and timed out after ' + TIMEOUT + ' ms'}),
+                    fn: code,
+                    executionTime: TIMEOUT
+                }
+            });
         }, TIMEOUT);
 
         const kill = () => {
+            clearTimeout(timeout);
+
             if (!useCache) {
-                clearTimeout(timeout);
                 workerHolder.worker.terminate();
                 URL.revokeObjectURL(workerHolder.url);
             }
         }
 
+        const forceKill = () => {
+            clearTimeout(timeout);
+            cache.delete(hash);
+            workerHolder.worker.terminate();
+            URL.revokeObjectURL(workerHolder.url);
+        }
+
         workerHolder.worker.onmessage = (event) => {
             kill();
-            resolve(event.data as CodeExecutionResult[]);
+            resolve(event.data);
         }
+
         workerHolder.worker.onerror = (error) => {
             kill();
             if (error.message !== undefined) {
-                reject(error);
+                resolve({
+                    ...execution,
+                    ...{
+                        value: null,
+                        error: error.message,
+                        fn: code,
+                        executionTime: 0
+                    }
+                });
             }
         }
-        workerHolder.worker.postMessage({
-            functions: functions
-        });
+        workerHolder.worker.postMessage(execution);
     });
 }

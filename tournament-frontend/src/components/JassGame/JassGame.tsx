@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { RemoteActionRequest, State, WebsocketMessage } from '../../reducers';
+import { GameState, RemoteActionRequest, State, WebsocketMessage } from '../../reducers';
 // @ts-ignore
 import SockJsClient from 'react-stomp';
 import {
@@ -17,9 +17,16 @@ import { CodeExecutionDescription, codeExecutionWorker } from '../../services/Co
 import { actionChannel, call, delay, put, select, take, takeEvery } from 'redux-saga/effects'
 import { Col, Row, Statistic } from 'antd';
 
+interface Props {
+    gameState: GameState,
+    renderView: boolean
+}
 
-const mapStateToProps = (state: State) => {
-    return state;
+const mapStateToProps = (state: State): Props => {
+    return {
+        gameState: state.gameState,
+        renderView: state.debugger.renderGameState
+    };
 };
 
 let webSocket: any;
@@ -53,13 +60,15 @@ const evaluateFunction = (action: RemoteActionRequest): CodeExecutionDescription
 
 export function* handleBackpressure() {
     const channel = yield actionChannel('QUEUE_WEBSOCKET_MESSAGE');
+    const pauseChannel = yield actionChannel('SET_PAUSED')
     while (true) {
         const action = (yield take(channel)).payload as WebsocketMessage;
         for (let i = 0; i < 100 - (yield select((state: State) => state.debugger.speed)); i++) {
             yield delay(10);
         }
 
-        while ((yield select((state: State) => state.debugger.paused))) {
+        while ((yield select((state: State) => state.paused))) {
+            yield take(pauseChannel);
         }
 
         if (action.messageType === 'state') {
@@ -83,13 +92,9 @@ export function* newGameSaga() {
 
 export function* calculateSaga() {
     yield takeEvery('SET_ACTION_REQUEST', function* (action: Action) {
-        try {
-            const code = yield select((state: State) => state.editor.playerCode);
-            const result = yield call(codeExecutionWorker, code, [evaluateFunction(action.payload)], true);
-            yield put(setResultCodeExecution(result[0]))
-        } catch (e) {
-            console.error('saga error', e);
-        }
+        const code = yield select((state: State) => state.editor.playerCode);
+        const result = yield call(codeExecutionWorker, code, evaluateFunction(action.payload), true);
+        yield put(setResultCodeExecution(result))
     });
 }
 
@@ -110,8 +115,8 @@ const onWebsocketMessage = (message: WebsocketMessage) => {
     store.dispatch(queueWebsocketMessage(message))
 }
 
-const mapNextActionToHumanReadable = (state: State) => {
-    switch (state.gameState.nextAction) {
+const mapNextActionToHumanReadable = (state: GameState) => {
+    switch (state.nextAction) {
         case 'START_ROUND':
             return 'Start round';
         case 'DECIDE_SHIFT':
@@ -141,8 +146,8 @@ const mapNextActionToHumanReadable = (state: State) => {
     }
 }
 
-const mapPlayingModeToHumanReadable = (state: State) => {
-    switch (state.gameState.playingMode) {
+const mapPlayingModeToHumanReadable = (state: GameState) => {
+    switch (state.playingMode) {
         case 'TOP_DOWN':
             return 'Top down';
         case 'BOTTOM_UP':
@@ -160,10 +165,10 @@ const mapPlayingModeToHumanReadable = (state: State) => {
     }
 }
 
-const mapPlayerToHumanReadable = (state: State) => {
-    const players = state.gameState.teams.flatMap(t => t.players);
+const mapPlayerToHumanReadable = (state: GameState) => {
+    const players = state.teams.flatMap(t => t.players);
 
-    switch (players.indexOf(state.gameState.nextPlayer)) {
+    switch (players.indexOf(state.nextPlayer)) {
         case 0:
             return 'Team 1 / You';
         case 1:
@@ -177,7 +182,7 @@ const mapPlayerToHumanReadable = (state: State) => {
     }
 }
 
-export const JassGame = (state: State) => {
+export const JassGame = (state: Props) => {
     const gameStateView = state.gameState ? (
         <div>
             <Row>
@@ -191,23 +196,23 @@ export const JassGame = (state: State) => {
 
             <Row>
                 <Col span={12}>
-                    <Statistic title="Next action" value={mapNextActionToHumanReadable(state)}/>
+                    <Statistic title="Next action" value={mapNextActionToHumanReadable(state.gameState)}/>
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Next player" value={mapPlayerToHumanReadable(state)}/>
+                    <Statistic title="Next player" value={mapPlayerToHumanReadable(state.gameState)}/>
                 </Col>
             </Row>
 
             <Row>
                 <Col span={12}>
-                    <Statistic title="Trump" value={mapPlayingModeToHumanReadable(state)}/>
+                    <Statistic title="Trump" value={mapPlayingModeToHumanReadable(state.gameState)}/>
                 </Col>
                 <Col span={12}>
                     <Statistic title="Step" value={state.gameState.revision}/>
                 </Col>
             </Row>
 
-            {state.gameState.nextAction !== 'EXIT' && state.debugger.renderGameState && <GameStateView/>}
+            {state.gameState.nextAction !== 'EXIT' && state.renderView && <GameStateView/>}
         </div>
     ) : <></>;
 

@@ -4,7 +4,7 @@ import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
-import { State } from '../../reducers';
+import { CodeEditorState, State } from '../../reducers';
 import { updateCode } from '../../actions';
 import { connect } from 'react-redux';
 import store from '../../store';
@@ -13,8 +13,8 @@ import CodeTestRunner from "./CodeTestRunner";
 import GameDebugger from './GameDebugger';
 // @ts-ignore
 
-const mapStateToProps = (state: State) => {
-    return state;
+const mapStateToProps = (state: State): CodeEditorState => {
+    return state.editor;
 }
 
 const onValueChange = (code: string) => {
@@ -29,7 +29,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     }
 }
 
-const CodeEditor = (state: State) => {
+const CodeEditor = (state: CodeEditorState) => {
 
     useEffect(() => {
         document.addEventListener('keydown', onKeyDown, false);
@@ -38,6 +38,8 @@ const CodeEditor = (state: State) => {
             document.removeEventListener('keydown', onKeyDown)
         }
     });
+
+    console.log('editor render');
 
     return <div>
         <Row>
@@ -52,7 +54,7 @@ const CodeEditor = (state: State) => {
                     </Affix>
                 </div>
                 <Editor
-                    value={state.editor.playerCode}
+                    value={state.playerCode}
                     onValueChange={onValueChange}
                     highlight={code => highlight(code, languages.js)}
                     padding={20}

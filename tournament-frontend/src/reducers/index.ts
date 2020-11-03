@@ -10,6 +10,7 @@ export interface State {
     debugger: GameDebuggerState;
     codeTest: CodeTestState;
     flow: Flow;
+    paused: boolean;
 }
 
 export interface WebsocketMessage {
@@ -18,7 +19,7 @@ export interface WebsocketMessage {
 }
 
 export interface CodeTestState {
-    status: 'RUNNING' | 'DONE';
+    status: 'FAIL' | 'SUCCESS';
     results: CodeExecutionResult[];
 }
 
@@ -31,7 +32,6 @@ export interface GameDebuggerState {
     stateFilter: 'ALL' | 'PLAYER_ONLY';
     pauseOnTurn: boolean;
     renderGameState: boolean;
-    paused: boolean;
 }
 
 export interface Flow {
@@ -83,15 +83,15 @@ const initialState: State = {
     flow: {
         currentStep: 0,
     },
+    paused: false,
     debugger: !!localStorage.getItem('debugger_settings') ? JSON.parse(localStorage.getItem('debugger_settings')) : {
         speed: 100,
         stateFilter: 'ALL',
         renderGameState: true,
         pauseOnTurn: true,
-        paused: false,
     },
     codeTest: {
-        status: 'DONE',
+        status: 'SUCCESS',
         results: []
     },
     editor: {
@@ -154,10 +154,7 @@ function rootReducer(state: State = initialState, action: Action): State {
             return {
                 ...state,
                 ...{
-                    debugger: {
-                        ...state.debugger,
-                        ...{ paused: action.payload }
-                    }
+                    paused: action.payload,
                 }
             };
         case 'RUN_NEW_GAME':
@@ -176,7 +173,7 @@ function rootReducer(state: State = initialState, action: Action): State {
                 ...state,
                 ...{
                     codeTest: {
-                        status: 'RUNNING',
+                        status: 'SUCCESS',
                         results: []
                     }
                 }
@@ -186,7 +183,8 @@ function rootReducer(state: State = initialState, action: Action): State {
                 ...state,
                 ...{
                     codeTest: {
-                        status: 'DONE',
+                        status: action.payload.map((r: any) => r.error === undefined)
+                            .reduce((a: boolean, b: boolean) => a && b, true) ? 'SUCCESS' : 'FAIL',
                         results: action.payload
                     }
                 }

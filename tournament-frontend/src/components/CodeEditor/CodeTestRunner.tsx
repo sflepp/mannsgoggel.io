@@ -4,7 +4,7 @@ import React from 'react';
 import { Action, codeTestResult } from '../../actions';
 import { Alert, Badge, Popover } from 'antd';
 import { codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeLatest } from 'redux-saga/effects';
 
 interface ClassStateValues {
     code: string;
@@ -32,7 +32,17 @@ export function* runTestsSaga() {
                 }
             ];
 
-            yield put(codeTestResult(yield call(codeExecutionWorker, action.payload, tests)));
+            yield put(codeTestResult([]));
+
+            for (var i = 0; i < tests.length; i++) {
+                const currentTestResults = (yield select((state: State) => state.codeTest.results));
+                console.log(currentTestResults);
+                yield put(codeTestResult([
+                    ...currentTestResults,
+                    (yield call(codeExecutionWorker, action.payload, tests[i], true))
+                ]));
+            }
+
         } catch (error) {
             yield put(codeTestResult([{
                 description: 'Syntax error',
@@ -71,8 +81,8 @@ const CodeTestRunner = (state: ClassStateValues) => {
 
     return (
         <>
-            <div style={{ display: "inline", paddingRight: "10px" }}>{badges}<span
-                style={{ fontWeight: 'bold', color: `rgb(${red}, ${green}, 26)` }}>{totalExecutionTime} ms</span></div>
+            <div style={{ display: "inline", paddingRight: "10px", whiteSpace: 'nowrap' }}>{badges}<span
+                style={{ fontWeight: 'bold', color: `rgb(${red}, ${green}, 26)`}}>{totalExecutionTime} ms</span></div>
         </>
     );
 }

@@ -1,9 +1,9 @@
 import { GameDebuggerState, State } from '../../reducers';
 import React from 'react';
 import { connect } from 'react-redux';
-import { Affix, Button, Checkbox, Col, Collapse, Divider, Row, Select, Slider } from 'antd';
+import { Affix, Button, Checkbox, Col, Collapse, Divider, Row, Select, Slider, Switch } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { runNewGame, setDebuggerSettings } from '../../actions';
+import { runNewGame, setDebuggerSettings, setPaused } from '../../actions';
 import store from '../../store';
 import JassGame from '../JassGame/JassGame';
 
@@ -11,6 +11,7 @@ import JassGame from '../JassGame/JassGame';
 import JSONPretty from 'react-json-prettify';
 import { SelectValue } from 'antd/lib/select';
 import MoveDebugger from './MoveDebugger';
+import ReactJson from 'react-json-view';
 
 const { Panel } = Collapse;
 
@@ -22,6 +23,10 @@ const mapStateToProps = (state: State) => {
 
 const startNewGame = (state: GameDebuggerState) => {
     store.dispatch(runNewGame(JSON.stringify({ name: 'asdf', filter: state.stateFilter })));
+}
+
+const resume = () => {
+    store.dispatch(setPaused(false));
 }
 
 const changeSpeed = (state: GameDebuggerState, speed: number) => {
@@ -64,23 +69,28 @@ const GameDebugger = (state: State) => {
     const consoleLogs = state.actionResult?.consoleOutput || [];
     const isGameRunning = !!state.gameState && state.gameState.nextAction !== 'EXIT';
 
-    const showDebugger = !!state.gameState && state.debugger.paused;
-
     return <div>
         <Affix offsetTop={0}>
             <div style={{ backgroundColor: 'white', height: 'calc(100vh)', overflowY: 'scroll' }}>
-                <Collapse activeKey={showDebugger ? ['state', 'debugger', 'console'] : ['state', 'settings']}>
+                <Collapse defaultActiveKey={['state', 'settings', 'debugger', 'console']}>
                     <Panel header="Game state" key="state">
                         <JassGame/>
                     </Panel>
                     <Panel header="Debug settings" key="settings">
-                        <Button
+                        {!state.paused && <Button
                             type="primary"
+                            disabled={state.codeTest.status === 'FAIL'}
                             icon={<CaretRightOutlined/>}
                             loading={isGameRunning}
                             onClick={() => startNewGame(state.debugger)}>
                             Run random game
-                        </Button>
+                        </Button>}
+                        {state.paused && <Button
+                            type="primary"
+                            icon={<CaretRightOutlined/>}
+                            onClick={() => resume()}>
+                            Step to next
+                        </Button>}
                         <Divider/>
                         <Row>
                             <Col span={12}>
@@ -101,18 +111,13 @@ const GameDebugger = (state: State) => {
                             </Col>
                             <Col span={12}>
                                 <h4>Debug</h4>
-                                <Checkbox
-                                    checked={state.debugger.pauseOnTurn}
-                                    onChange={(e) => changePauseOnTurn(state.debugger, e.target.checked)}>
-                                    Debug moves
-                                </Checkbox>
+                                <Switch checked={state.debugger.pauseOnTurn}
+                                        onChange={(e) => changePauseOnTurn(state.debugger, e)} /> Debug moves
                                 <Divider/>
                                 <h4>Rendering</h4>
-                                <Checkbox
+                                <Switch
                                     checked={state.debugger.renderGameState}
-                                    onChange={(e) => renderGameState(state.debugger, e.target.checked)}>
-                                    Show game board
-                                </Checkbox>
+                                    onChange={(e) => renderGameState(state.debugger, e)} /> Show game board
                             </Col>
                         </Row>
                     </Panel>
@@ -121,24 +126,12 @@ const GameDebugger = (state: State) => {
                     </Panel>
                     <Panel header="Console" key="console">
                         {consoleLogs.map((c) => <div>
-                            <JSONPretty key={c}
-                                        theme={{
-                                            background: 'rgb(255, 255, 255)',
-                                            brace: 'rgb(51, 51, 51)',
-                                            keyQuotes: 'rgb(51, 51, 51)',
-                                            valueQuotes: 'rgb(221, 17, 68)',
-                                            colon: 'rgb(51, 51, 51)',
-                                            comma: 'rgb(51, 51, 51)',
-                                            key: 'rgb(51, 51, 51)',
-                                            value: {
-                                                string: 'rgb(221, 17, 68)',
-                                                "null": 'rgb(0, 128, 128)',
-                                                number: 'rgb(0, 128, 128)',
-                                                "boolean": 'rgb(0, 128, 128)'
-                                            },
-                                            bracket: 'rgb(51, 51, 51)'
-                                        }}
-                                        style={{ width: '100%' }} json={JSON.parse(c)} padding={2}/>
+                            {JSON.parse(c).map((t: any) => {
+                                if (typeof t === 'object') {
+                                    return <ReactJson enableClipboard={false} collapsed={true} displayObjectSize={false} displayDataTypes={false} src={t} />
+                                }
+                                return <div>{t}</div>;
+                            })}
                             <Divider/>
                         </div>)}
                     </Panel>
