@@ -17,7 +17,7 @@ export const JassBoardView = (state: Props) => {
     console.log(state);
 
     if (state.gameState === null) {
-        return <div>Game hast not startet yet.</div>
+        return <div>Game has not started yet.</div>
     }
 
     return <div className={'jass-table'} style={{ backgroundImage: 'url("fabric.jpg")' }}>

@@ -85,10 +85,10 @@ const initialState: State = {
     },
     paused: false,
     debugger: !!localStorage.getItem('debugger_settings') ? JSON.parse(localStorage.getItem('debugger_settings')) : {
-        speed: 100,
+        speed: 75,
         stateFilter: 'ALL',
         renderGameState: true,
-        pauseOnTurn: true,
+        pauseOnTurn: false,
     },
     codeTest: {
         status: 'SUCCESS',

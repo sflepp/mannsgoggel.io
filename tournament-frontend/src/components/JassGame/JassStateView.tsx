@@ -1,5 +1,5 @@
 import { GameState, State } from "../../reducers";
-import { Col, Row, Statistic, Divider } from "antd";
+import { Col, Row, Divider } from "antd";
 import { connect } from "react-redux";
 import React from "react";
 
@@ -87,42 +87,41 @@ export const JassStateView = (state: Props) => {
         <div>
             <Row>
                 <Col span={12}>
-                    <h4>Points Team 1 (you)</h4>
+                    <h3>Points Team 1 (you)</h3>
                     {state.gameState.teams[0].points}
                 </Col>
                 <Col span={12}>
-                    <h4>Points Team 2</h4>
+                    <h3>Points Team 2</h3>
                     {state.gameState.teams[1].points}
                 </Col>
             </Row>
 
-            <Divider/>
+            <br />
 
             <Row>
                 <Col span={12}>
-                    <h4>Next action</h4>
+                    <h3>Next action</h3>
                     {mapNextActionToHumanReadable(state.gameState)}
                 </Col>
                 <Col span={12}>
-                    <h4>Next player</h4>
+                    <h3>Next player</h3>
                     {mapPlayerToHumanReadable(state.gameState)}
                 </Col>
             </Row>
 
-            <Divider/>
-
+            <br />
             <Row>
                 <Col span={12}>
-                    <h4>Trump</h4>
+                    <h3>Trump</h3>
                     {mapPlayingModeToHumanReadable(state.gameState)}
                 </Col>
                 <Col span={12}>
-                    <h4>Step</h4>
+                    <h3>Step</h3>
                     {state.gameState.revision}
                 </Col>
             </Row>
         </div>
-    ) : <></>;
+    ) : <div>Game has not started yet.</div>;
 
     return <div>
         {gameStateView}

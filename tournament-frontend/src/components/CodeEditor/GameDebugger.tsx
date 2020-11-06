@@ -21,14 +21,6 @@ const mapStateToProps = (state: State) => {
     return state;
 }
 
-const startNewGame = (state: GameDebuggerState) => {
-    store.dispatch(runNewGame(JSON.stringify({ name: 'asdf', filter: state.stateFilter })));
-}
-
-const resume = () => {
-    store.dispatch(setPaused(false));
-}
-
 const changeSpeed = (state: GameDebuggerState, speed: number) => {
     store.dispatch(setDebuggerSettings({
         ...state,
@@ -47,15 +39,6 @@ const changePauseOnTurn = (state: GameDebuggerState, value: boolean) => {
     }));
 }
 
-const renderGameState = (state: GameDebuggerState, value: boolean) => {
-    store.dispatch(setDebuggerSettings({
-        ...state,
-        ...{
-            renderGameState: value
-        }
-    }))
-}
-
 const stateFilter = (state: GameDebuggerState, value: 'ALL' | 'PLAYER_ONLY') => {
     store.dispatch(setDebuggerSettings({
         ...state,
@@ -67,7 +50,6 @@ const stateFilter = (state: GameDebuggerState, value: 'ALL' | 'PLAYER_ONLY') => 
 
 const GameDebugger = (state: State) => {
     const consoleLogs = state.actionResult?.consoleOutput || [];
-    const isGameRunning = !!state.gameState && state.gameState.nextAction !== 'EXIT';
 
     const debuggerTitle = (
         <div style={{ width: '100%'}}>
@@ -93,33 +75,24 @@ const GameDebugger = (state: State) => {
         <div>
             <Affix offsetTop={0}>
                 <div style={{ height: 'calc(100vh)', overflowY: 'scroll' }}>
-                    <Collapse defaultActiveKey={['settings']}>
+                    <Collapse defaultActiveKey={['board', 'state']}>
+                        <Panel header="Board" key="board">
+                            <JassBoardView/>
+                        </Panel>
+                        <Panel header={stateTitle} key="state">
+                            <JassStateView/>
+                        </Panel>
                         <Panel header="Debug settings" key="settings">
-                            {!state.paused && <Button
-                                type="primary"
-                                disabled={state.codeTest.status === 'FAIL'}
-                                icon={<CaretRightOutlined/>}
-                                loading={isGameRunning}
-                                onClick={() => startNewGame(state.debugger)}>
-                                Run random game
-                            </Button>}
-                            {state.paused && <Button
-                                type="primary"
-                                icon={<CaretRightOutlined/>}
-                                onClick={() => resume()}>
-                                Step to next
-                            </Button>}
-                            <Divider/>
                             <Row>
                                 <Col span={12}>
-                                    <h4>Speed {state.debugger.speed}</h4>
+                                    <h3>Speed {state.debugger.speed}</h3>
                                     <div style={{ paddingRight: '20px' }}>
                                         <Slider value={state.debugger.speed}
                                                 onChange={(e: number) => changeSpeed(state.debugger, e)}/>
                                     </div>
                                 </Col>
                                 <Col span={12}>
-                                    <h4>Debug</h4>
+                                    <h3>Debug</h3>
                                     <Switch checked={state.debugger.pauseOnTurn}
                                             onChange={(e) => changePauseOnTurn(state.debugger, e)}/> Debug moves
                                 </Col>
@@ -127,7 +100,7 @@ const GameDebugger = (state: State) => {
                             <Divider/>
                             <Row>
                                 <Col span={12}>
-                                    <h4>Filter moves</h4>
+                                    <h3>Filter moves</h3>
                                     <Select
                                         style={{width: '100%'}}
                                         labelInValue
@@ -141,12 +114,6 @@ const GameDebugger = (state: State) => {
 
                                 </Col>
                             </Row>
-                        </Panel>
-                        <Panel header={stateTitle} key="state">
-                            <JassStateView/>
-                        </Panel>
-                        <Panel header="Board" key="board">
-                            <JassBoardView/>
                         </Panel>
                         <Panel header={debuggerTitle} key="debugger">
                             <MoveDebugger/>

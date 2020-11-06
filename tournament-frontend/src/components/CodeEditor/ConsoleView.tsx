@@ -3,7 +3,7 @@ import React from "react";
 import { JSONObject } from "../ui/JSONObject";
 import { Divider } from "antd";
 
-export const ConsoleView = (props: {logs: ConsoleLog[]}) => {
+export const ConsoleView = (props: { logs: ConsoleLog[] }) => {
 
     const logOutput = props.logs.map((log: ConsoleLog) => {
         const payload = log.payload;
@@ -17,10 +17,18 @@ export const ConsoleView = (props: {logs: ConsoleLog[]}) => {
                 case "object":
                     return <span key={i}><JSONObject name={null} object={log} collapsed={2}/>&nbsp;</span>
                 default:
-                    return <span key={i} style={{fontFamily: 'monospace'}}>{log}&nbsp;</span>;
+                    return <span key={i} style={{ fontFamily: 'monospace' }}>{log}&nbsp;</span>;
             }
         });
     });
+
+    if (logOutput.length === 0) {
+        return <div>-</div>;
+    }
+
+    if(logOutput.length > 100) {
+        return <div>Too many logs.</div>
+    }
 
     return <div>{logOutput.map((logOutputEntry, i) => <div key={i}>{logOutputEntry}<Divider/></div>)}</div>;
 }

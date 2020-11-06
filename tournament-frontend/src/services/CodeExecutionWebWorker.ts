@@ -54,11 +54,20 @@ export function codeExecutionWorker(code: string, execution: CodeExecutionDescri
             var t1 = performance.now()
         
             let execution;
+            var t0 = performance.now()
             try {
+                var result = eval(event.data.fn);
+                
+                if (result === undefined || result === null) {
+                    throw new Error('Return value is ' + result);
+                }
+                
+                var t1 = performance.now()
+            
                 execution = { description: event.data.description, fn: event.data.fn, result: JSON.stringify(result), consoleOutput: log, executionTime: parseInt(t1 - t0) }
             } catch (e) {
                 var t1 = performance.now()
-                execution = { description: event.data.description, fn: event.data.fn, error: JSON.stringify(e), consoleOutput: log, executionTime: parseInt(t1 - t0) }
+                execution = { description: event.data.description, fn: event.data.fn, error: e.message, consoleOutput: log, executionTime: parseInt(t1 - t0) }
             }
         
             self.postMessage(execution);

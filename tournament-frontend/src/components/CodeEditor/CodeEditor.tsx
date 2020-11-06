@@ -12,6 +12,7 @@ import { Affix, Col, message, Row } from 'antd';
 import CodeTestRunner from "./CodeTestRunner";
 import GameDebugger from './GameDebugger';
 import JassGame from "../JassGame/JassGame";
+import StartNewGameButton from "./StartNewGameButton";
 // @ts-ignore
 
 const mapStateToProps = (state: State): CodeEditorState => {
@@ -48,9 +49,10 @@ const CodeEditor = (state: CodeEditorState) => {
         </Row>
         <Row>
             <Col span={14}>
-                <div style={{ position: 'absolute', zIndex: 10, right: 16, top: 16 }}>
+                <div style={{ position: 'absolute', zIndex: 10, right: 16, top: 16, width: '100%', textAlign: 'center' }}>
                     <Affix offsetTop={16}>
-                        {<CodeTestRunner/>}
+                        <div style={{position: 'absolute', right: 0}}><StartNewGameButton/></div>
+                        <div style={{display: 'inline-block', paddingTop: '4px'}}><CodeTestRunner/></div>
                     </Affix>
                 </div>
                 <Editor
@@ -67,7 +69,7 @@ const CodeEditor = (state: CodeEditorState) => {
             </Col>
             <Col span={10}>
                 <GameDebugger/>
-            </Col>}
+            </Col>
         </Row></div>;
 }
 

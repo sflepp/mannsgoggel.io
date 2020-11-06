@@ -80,8 +80,10 @@ const CodeTestRunner = (state: ClassStateValues) => {
 
     return (
         <>
-            <div style={{ display: "inline", paddingRight: "10px", whiteSpace: 'nowrap' }}>{badges}<span
-                style={{ fontWeight: 'bold', color: `rgb(${red}, ${green}, 26)`}}>{totalExecutionTime} ms</span></div>
+            <div style={{ paddingRight: "10px", whiteSpace: 'nowrap' }}>
+                {badges}
+                <span style={{ fontWeight: 'bold', color: `rgb(${red}, ${green}, 26)`}}>{totalExecutionTime} ms</span>
+            </div>
         </>
     );
 }

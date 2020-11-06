@@ -6,56 +6,75 @@ import { CodeExecutionResult } from '../../services/CodeExecutionWebWorker';
 import ReactJson from 'react-json-view';
 import { JSONObject } from "../ui/JSONObject";
 
-
-const mapStateToProps = (state: State): CodeExecutionResult => {
-    return state.actionResult;
+interface Props {
+    code: string;
+    actionResult: CodeExecutionResult;
 }
 
-const MoveDebugger = (state: CodeExecutionResult) => {
+const mapStateToProps = (state: State): Props => {
+    return {
+        code: state.editor.playerCode,
+        actionResult: state.actionResult,
+    };
+}
 
-    if (state === undefined) {
+const MoveDebugger = (state: Props) => {
+
+    console.log(state.actionResult);
+
+    if (state.actionResult === undefined) {
         return <div>Game hast not started yet.</div>
     }
 
-    const functionName = state.fn.match(/([a-zA-Z]+\()/)[1];
-    const functionParameters = JSON.parse(`[${state.fn.match(/(?:\()(.+)+(?:\))/)[1]}]`);
+    const functionName = state.actionResult.fn.match(/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/g)[0];
+    const functionParameters = JSON.parse(`[${state.actionResult.fn.match(/\b[^()]+\((.*)\)$/)[1]}]`);
 
-    const fnDefinition = state.fn.match(new RegExp(`/(function\splayCard\(([^\)])*\))/`));
-    console.log(fnDefinition);
+    let functionRegex = /function\s+(?<name>\w+)\s*\((?<arguments>(?:[^()]+)*)?\s*\)/g,
+        match,
+        matches = [];
+
+    while (match = functionRegex.exec(state.code)) {
+        matches.push(match.groups);
+    }
+
+    const functionDefinition = matches.find((match) => match.name === functionName);
+    const argumentNames = functionDefinition.arguments.split(',').map(s => s.trim());
 
 
     let result;
 
-    if (typeof JSON.parse(state.result) === 'object') {
-        result = <JSONObject name={'result'} object={JSON.parse(state.result)}/>
-    } else {
-        result = <span style={{fontFamily: 'monospace'}}>state.result</span>;
+    if (state.actionResult.result !== undefined) {
+        if (typeof JSON.parse(state.actionResult.result) === 'object') {
+            result = <JSONObject name={'result'} object={JSON.parse(state.actionResult.result)}/>
+        } else {
+            result = <span style={{ fontFamily: 'monospace' }}>{state.actionResult.result}</span>;
+        }
     }
 
     return <div>
         <Row>
-            <Col span={12}>
-                <h4>Execution time</h4>
-                <span style={{fontFamily: 'monospace'}}>{state.executionTime} ms</span>
+            <Col span={18}>
+                <h3>Next move</h3>
+                <span style={{ fontFamily: 'monospace' }}>{functionName}({argumentNames.join(", ")});</span>
             </Col>
-            <Col span={12}>
-                <h4>Next move</h4>
-                <span style={{fontFamily: 'monospace'}}>{functionName});</span>
+            <Col span={6} style={{textAlign: 'right'}}>
+                <h3>Execution time</h3>
+                <span style={{ fontFamily: 'monospace' }}>{state.actionResult.executionTime} ms</span>
             </Col>
         </Row>
         <Divider/>
         <Row>
             <Col span={24}>
-                <h4>Function call</h4>
+                <h3>Function call</h3>
                 <pre>{functionName}</pre>
-                {!!state.fn && functionParameters.map((parameter: any, i: number) => (
-                    <div style={{ paddingLeft: '20px' }}>
+                {!!state.actionResult.fn && functionParameters.map((parameter: any, i: number) => (
+                    <div key={i} style={{ paddingLeft: '20px' }}>
                         <ReactJson
                             theme={'grayscale:inverted'}
                             iconStyle={'triangle'}
                             indentWidth={2}
                             style={{ display: 'inline-block' }}
-                            name={"handCards"}
+                            name={argumentNames[i]}
                             collapsed={true}
                             enableClipboard={false}
                             displayObjectSize={false}
@@ -65,17 +84,17 @@ const MoveDebugger = (state: CodeExecutionResult) => {
                 )}
                 <pre>);</pre>
             </Col>
-            <Col span={12}>
-                <h4>Result</h4>
-                {result}
-            </Col>
         </Row>
         <Divider/>
         <Row>
-            <Col span={24}>
-                <h4>Error</h4>
-                {state.error}
-            </Col>
+            {state.actionResult.result && <Col span={12}>
+                <h3>Result</h3>
+                {result}
+            </Col>}
+            {state.actionResult.error && <Col span={24}>
+                <h3>Error</h3>
+                {state.actionResult.error}
+            </Col>}
         </Row>
     </div>
 }
