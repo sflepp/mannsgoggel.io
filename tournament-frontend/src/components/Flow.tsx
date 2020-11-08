@@ -22,8 +22,8 @@ const Flow = (state: State) => {
 
     const contentFlow = [
         <CodeEditor/>,
-        <div>asdf</div>,
-        <div>Submit</div>
+        <div>This feature is not finished yet.</div>,
+        <div>This feature is not finished yet.</div>
     ]
 
     return (
