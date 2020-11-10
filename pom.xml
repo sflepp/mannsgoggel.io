@@ -14,6 +14,7 @@
 
     <modules>
         <module>game-jass</module>
+        <module>tournament-frontend</module>
         <module>tournament-server</module>
     </modules>
 

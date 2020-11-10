@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "build": "cross-env REACT_APP_STAGE=prod react-app-rewired build",
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject"
   },
@@ -50,6 +50,7 @@
     "@types/prismjs": "^1.16.1",
     "@types/react-redux": "^7.1.9",
     "@types/socket.io-client": "^1.4.34",
+    "cross-env": "^7.0.2",
     "customize-cra": "^1.0.0",
     "customize-cra-react-refresh": "^1.1.0",
     "react-app-rewired": "^2.1.6"

@@ -13,6 +13,7 @@ import {
 import store from '../../store';
 import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { actionChannel, call, delay, put, select, take, takeEvery } from 'redux-saga/effects'
+import config from "../../config";
 
 let webSocket: any;
 
@@ -104,7 +105,7 @@ const onWebsocketMessage = (message: WebsocketMessage) => {
 }
 
 export const JassGame = () => {
-    return <SockJsClient url='http://localhost:8080/ws' topics={['/user/game']} onMessage={onWebsocketMessage}
+    return <SockJsClient url={config.websocketUrl} topics={['/user/game']} onMessage={onWebsocketMessage}
                          ref={ref}/>;
 }
 

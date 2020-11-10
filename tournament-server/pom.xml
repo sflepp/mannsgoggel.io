@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.mannsgoggel</groupId>
 	<artifactId>tournament-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>tournament-server</name>
 	<description>Tournament server</description>
 
@@ -38,6 +38,12 @@
 		<dependency>
 			<groupId>io.mannsgoggel</groupId>
 			<artifactId>game-jass</artifactId>
+			<version>1.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.mannsgoggel</groupId>
+			<artifactId>tournament-frontend</artifactId>
 			<version>1.0.0</version>
 			<scope>compile</scope>
 		</dependency>
@@ -119,6 +125,32 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals><goal>copy-resources</goal></goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/classes/static/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.parent.basedir}/tournament-frontend/build/</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
