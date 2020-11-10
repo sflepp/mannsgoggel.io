@@ -1,11 +1,11 @@
-FROM maven:3.5.2-jdk-15-alpine AS build-env
+# Build artefact
+FROM maven:3.6.3-openjdk-15 AS build-env
 COPY . /build/
 WORKDIR /build/
 RUN mvn package
 
-
+# Build runtime image
 FROM openjdk:15-jdk-alpine
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
-COPY --from=build-env /app/tournament-server/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build-env /build/tournament-server/target/*.jar app.jar
+EXPOSE 80
+ENTRYPOINT ["java","-jar","/app.jar", "--server.port=80"]
