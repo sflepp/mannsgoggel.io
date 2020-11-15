@@ -16,6 +16,10 @@
     <name>tournament-frontend</name>
     <description>Tournament frontend</description>
 
+    <properties>
+        <java.version>15</java.version>
+    </properties>
+
     <build>
         <resources>
             <resource>
