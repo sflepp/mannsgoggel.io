@@ -22,7 +22,7 @@ const Flow = (state: State) => {
 
     const contentFlow = [
         <CodeEditor/>,
-        <div>This feature is not finished yet.</div>,
+        <div>CORS test. This feature is not finished yet.</div>,
         <div>This feature is not finished yet.</div>
     ]
 
