@@ -51,7 +51,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setAllowedOrigins("https://mannsgoggel.io", "http://localhost:3000")
+                .setAllowedOrigins("*")
                 .setHandshakeHandler(new CustomHandshakeHandler())
                 .withSockJS();
     }
