@@ -3,8 +3,9 @@ import { connect } from 'react-redux';
 import React from 'react';
 import { Col, Divider, Row } from 'antd';
 import { CodeExecutionResult } from '../../services/CodeExecutionWebWorker';
-import ReactJson from 'react-json-view';
 import { JSONObject } from "../ui/JSONObject";
+
+const ReactJson = require('react-json-view');
 
 interface Props {
     code: string;
@@ -33,6 +34,7 @@ const MoveDebugger = (state: Props) => {
         match,
         matches = [];
 
+    // eslint-disable-next-line
     while (match = functionRegex.exec(state.code)) {
         matches.push(match.groups);
     }

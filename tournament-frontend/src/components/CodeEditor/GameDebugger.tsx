@@ -1,9 +1,8 @@
 import { GameDebuggerState, State } from '../../reducers';
 import React from 'react';
 import { connect } from 'react-redux';
-import { Affix, Badge, Button, Col, Collapse, Divider, Row, Select, Slider, Switch } from 'antd';
-import { CaretRightOutlined } from '@ant-design/icons';
-import { runNewGame, setDebuggerSettings, setPaused } from '../../actions';
+import { Affix, Badge, Col, Collapse, Divider, Row, Select, Slider, Switch } from 'antd';
+import { setDebuggerSettings } from '../../actions';
 import store from '../../store';
 
 // @ts-ignore

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -17,7 +18,11 @@ class CorsSettings implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
         RequestFacade request = (RequestFacade) req;
 
-        if (request.getHeader("Origin") != null) {
+        var allowedOrigins = List.of("http://localhost:3000", "https://www.mannsgoggel.io", "https://mannsgoggel.io");
+
+        var origin = request.getHeader("Origin");
+
+        if (allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
             response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
             response.setHeader("Access-Control-Allow-Headers", "x-requested-with");

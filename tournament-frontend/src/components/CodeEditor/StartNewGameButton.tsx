@@ -1,7 +1,7 @@
 import { State } from '../../reducers';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Button, message } from 'antd';
+import { Button } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { runNewGame, setPaused } from '../../actions';
 import store from '../../store';

@@ -1,5 +1,6 @@
 import React from "react";
-import ReactJson from "react-json-view";
+
+const ReactJson = require("react-json-view");
 
 
 export const JSONObject = (props: { name: string, object: any, collapsed?: number }) => {
