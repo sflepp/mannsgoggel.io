@@ -1,83 +1,66 @@
 package io.mannsgoggel.gamejass.domain.game;
 
-import io.mannsgoggel.gamejass.domain.action.Action;
-import io.mannsgoggel.gamejass.domain.action.ActionNotAllowed;
-import io.mannsgoggel.gamejass.domain.player.Player;
-import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ReplayProcessor;
+import io.mannsgoggel.gamejass.domain.game.player.Player;
+import io.mannsgoggel.gamejass.domain.game.state.CardDeck;
+import io.mannsgoggel.gamejass.domain.game.state.State;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static io.mannsgoggel.gamejass.domain.CollectionShortcuts.map;
+import static io.mannsgoggel.gamejass.domain.game.action.Actions.*;
+import static io.mannsgoggel.gamejass.domain.game.state.Selectors.players;
 
-@Data
-public class JassGame {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JassGame.class);
-    private final List<Player> actors;
-    private final ReplayProcessor<GameState> state$ = ReplayProcessor.create();
-    private GameState currentState;
+public class JassGame implements Consumer<State> {
+    private final Store store;
+    private final List<Player> players;
 
-    public void start() {
-        currentState = GameState.withTeams(map(actors, Player::getName));
+    public JassGame(List<Player> players) {
+        this.store = new Store();
+        this.store.subscribe(this);
 
-        actors.forEach(state$::subscribe);
-        actors.forEach(actor -> actor.setGame(this));
-
-        state$.subscribe(this::gameAction);
-        state$.onNext(currentState);
+        this.players = players;
+        this.players.forEach(player -> {
+            player.setStore(store);
+            store.subscribe(player);
+        });
     }
 
-    private void gameAction(GameState state) {
+    public Store getStore() {
+        return store;
+    }
+
+    public void start() {
+        var playerNames = map(players, Player::getName);
+
+        var teams = List.of(
+                State.Team.builder().name("team-1").players(playerNames.subList(0, 2)).points(0).build(),
+                State.Team.builder().name("team-2").players(playerNames.subList(2, 4)).points(0).build()
+        );
+
+        store.dispatch(new StartGame(teams));
+    }
+
+    @Override
+    public void accept(State state) {
         if (state.getNextPlayer() != null) {
             return;
         }
 
         var nextAction = state.getNextAction();
-        var players = state.queryPlayers();
+        var players = players(state);
 
         switch (nextAction) {
-            case START_GAME -> dispatchAction(new JassActions.StartGame());
-            case START_ROUND -> dispatchAction(new JassActions.StartRound());
-            case HAND_OUT_CARDS -> dispatchAction(new JassActions.HandOutCards(Card.CardDeckBuilder.buildAndShuffle(players, state.getPlayingMode())));
-            case SET_STARTING_PLAYER -> dispatchAction(new JassActions.SetStartingPlayer(players.get(new Random().nextInt(players.size()))));
-            case END_STICH -> dispatchAction(new JassActions.EndStich());
-            case END_ROUND -> dispatchAction(new JassActions.EndRound());
-            case END_GAME -> dispatchAction(new JassActions.EndGame());
+            case START_GAME -> {}
+            case START_ROUND -> store.dispatch(new StartRound());
+            case HAND_OUT_CARDS -> {
+                store.dispatch(new HandOutCards(CardDeck.buildAndShuffle(players, state.getPlayingMode())));
+            }
+            case SET_STARTING_PLAYER -> store.dispatch(new SetStartingPlayer(players.get(new Random().nextInt(players.size()))));
+            case END_STICH -> store.dispatch(new EndStich());
+            case END_ROUND -> store.dispatch(new EndRound());
+            case END_GAME -> store.dispatch(new EndGame());
         }
-    }
-
-    public void dispatchAction(Action<?> action) {
-        LOGGER.info(currentState.getRevision() + ": " + (action.getPlayer() == null ? "" : action.getPlayer() + " | ") + action.getAction() + (action.getPayload() == null ? "" : (" | " + action.getPayload())));
-
-        if (!action.getAction().equals(currentState.getNextAction())) {
-            throw new ActionNotAllowed(
-                    "Expected next action " + currentState.getNextAction() + " but got " + action.getAction()
-            );
-        }
-
-        if (currentState.isNotNextPlayer(action.getPlayer())) {
-            throw new ActionNotAllowed(
-                    "Expected next player " + currentState.getNextPlayer() + " but got " + action.getPlayer()
-            );
-        }
-
-        var newState = action.build(currentState.clone())
-                .revision(currentState.getRevision() + 1)
-                .build();
-
-        currentState = newState;
-        state$.onNext(newState);
-    }
-
-    public GameState latestState() {
-        return currentState;
-    }
-
-    public Flux<GameState> getState$() {
-        return state$;
     }
 }

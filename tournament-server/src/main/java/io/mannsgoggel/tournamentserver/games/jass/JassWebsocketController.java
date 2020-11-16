@@ -1,10 +1,10 @@
 package io.mannsgoggel.tournamentserver.games.jass;
 
-import io.mannsgoggel.gamejass.domain.action.RemoteAction;
 import io.mannsgoggel.gamejass.domain.game.JassGame;
-import io.mannsgoggel.gamejass.domain.player.LocalPlayer;
-import io.mannsgoggel.gamejass.domain.player.RemotePlayer;
-import io.mannsgoggel.gamejass.strategy.RandomJassStrategy;
+import io.mannsgoggel.gamejass.domain.game.action.RemoteAction;
+import io.mannsgoggel.gamejass.domain.game.player.LocalPlayer;
+import io.mannsgoggel.gamejass.domain.game.player.RemotePlayer;
+import io.mannsgoggel.gamejass.domain.game.strategy.RandomJassStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.clients.WebsocketPlayerStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.dto.GameOptions;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -35,7 +35,7 @@ public class JassWebsocketController {
 
         players.put(principal.getName(), player);
 
-        JassGame jassGame = new JassGame(
+        JassGame game = new JassGame(
                 List.of(
                         player,
                         new LocalPlayer(UUID.randomUUID().toString(), new RandomJassStrategy()),
@@ -44,7 +44,7 @@ public class JassWebsocketController {
                 )
         );
 
-        jassGame.start();
+        game.start();
     }
 
     @MessageMapping("/jass/action")

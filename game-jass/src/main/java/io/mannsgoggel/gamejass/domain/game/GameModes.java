@@ -6,37 +6,41 @@ import org.javatuples.Triplet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface GameMode {
-    Integer getRankOrder(Card card);
+import static io.mannsgoggel.gamejass.domain.game.state.State.Card;
 
-    Integer getPoints(Card card);
-
-    Card winningCard(List<Card> tableStack);
-
-    Card higherCard(Card a, Card b);
-
-    List<Card> playableCards(List<Card> handCards, List<Card> tableStack);
-
-    Boolean isTrump(Card card);
-
-    enum PlayingMode {
-        TOP_DOWN, BOTTOM_UP, TRUMP_HEARTS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
-    }
-
-    class Builder {
-        static GameMode build(PlayingMode mode) {
+public class GameModes {
+    public static class Builder {
+        static GameMode build(GameMode.PlayingMode mode) {
             return switch (mode) {
-                case BOTTOM_UP -> new GameMode.BottomUp();
-                case TOP_DOWN -> new GameMode.TopDown();
-                case TRUMP_HEARTS -> new GameMode.Trump(Card.Color.HEARTS);
-                case TRUMP_SPADES -> new GameMode.Trump(Card.Color.SPADES);
-                case TRUMP_DIAMONDS -> new GameMode.Trump(Card.Color.DIAMONDS);
-                case TRUMP_CLUBS -> new GameMode.Trump(Card.Color.CLUBS);
+                case BOTTOM_UP -> new BottomUp();
+                case TOP_DOWN -> new TopDown();
+                case TRUMP_HEARTS -> new Trump(Card.Color.HEARTS);
+                case TRUMP_SPADES -> new Trump(Card.Color.SPADES);
+                case TRUMP_DIAMONDS -> new Trump(Card.Color.DIAMONDS);
+                case TRUMP_CLUBS -> new Trump(Card.Color.CLUBS);
             };
         }
     }
 
-    class BottomUp implements GameMode {
+    public interface GameMode {
+
+        Integer getPoints(Card card);
+
+        Card winningCard(List<Card> tableStack);
+
+        Card higherCard(Card a, Card b);
+
+        List<Card> playableCards(List<Card> handCards, List<Card> tableStack);
+
+        Boolean isTrump(Card card);
+
+        enum PlayingMode {
+            TOP_DOWN, BOTTOM_UP, TRUMP_HEARTS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
+        }
+
+    }
+
+    public static class BottomUp implements GameMode {
 
         private static final List<Pair<Card.Suit, Integer>> VALUES = List.of(
                 Pair.with(Card.Suit.ACE, 0),
@@ -57,8 +61,7 @@ public interface GameMode {
                     .orElseThrow(() -> new RuntimeException("Card not found"));
         }
 
-        @Override
-        public Integer getRankOrder(Card card) {
+        private Integer getRankOrder(Card card) {
             return VALUES.indexOf(getPairFor(card));
         }
 
@@ -103,7 +106,7 @@ public interface GameMode {
         }
     }
 
-    class TopDown implements GameMode {
+    public static class TopDown implements GameMode {
 
         private static final List<Pair<Card.Suit, Integer>> VALUES = List.of(
                 Pair.with(Card.Suit.SIX, 0),
@@ -124,8 +127,7 @@ public interface GameMode {
                     .orElseThrow(() -> new RuntimeException("Card not found"));
         }
 
-        @Override
-        public Integer getRankOrder(Card card) {
+        private Integer getRankOrder(Card card) {
             return VALUES.indexOf(getPairFor(card));
         }
 
@@ -170,7 +172,7 @@ public interface GameMode {
         }
     }
 
-    class Trump implements GameMode {
+    public static class Trump implements GameMode {
 
         private static final List<Triplet<Boolean, Card.Suit, Integer>> VALUES = List.of(
                 Triplet.with(false, Card.Suit.SIX, 0),
@@ -199,8 +201,7 @@ public interface GameMode {
             this.trumpColor = trumpColor;
         }
 
-        @Override
-        public Integer getRankOrder(Card card) {
+        private Integer getRankOrder(Card card) {
             return VALUES.indexOf(getTripletFor(card));
         }
 

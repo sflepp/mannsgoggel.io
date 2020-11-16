@@ -1,5 +1,6 @@
 package io.mannsgoggel.gamejass.domain.game;
 
+import io.mannsgoggel.gamejass.domain.game.state.State;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,24 +12,24 @@ class GameModeTest {
 
     @Test
     public void bottomUp_cardOrder() {
-        var testee = new GameMode.BottomUp();
+        var testee = new GameModes.BottomUp();
 
         var higherCard = testee.higherCard(
-                new Card(Card.Color.CLUBS, Card.Suit.TEN),
-                new Card(Card.Color.DIAMONDS, Card.Suit.KING)
+                new State.Card(State.Card.Color.CLUBS, State.Card.Suit.TEN),
+                new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.KING)
         );
 
-        assertThat(higherCard, equalTo(new Card(Card.Color.CLUBS, Card.Suit.TEN)));
+        assertThat(higherCard, equalTo(new State.Card(State.Card.Color.CLUBS, State.Card.Suit.TEN)));
     }
 
     @Test
     public void bottomUp_stichWinningCard() {
-        var testee = new GameMode.BottomUp();
+        var testee = new GameModes.BottomUp();
 
-        var card1 = new Card(Card.Color.DIAMONDS, Card.Suit.TEN);
-        var card2 = new Card(Card.Color.SPADES, Card.Suit.SIX);
-        var card3 = new Card(Card.Color.DIAMONDS, Card.Suit.EIGHT);
-        var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
+        var card1 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.TEN);
+        var card2 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.SIX);
+        var card3 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.EIGHT);
+        var card4 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.ACE);
 
         var tableStack = List.of(
                 card1,
@@ -44,12 +45,12 @@ class GameModeTest {
 
     @Test
     public void topDown_stichWinningCard() {
-        var testee = new GameMode.TopDown();
+        var testee = new GameModes.TopDown();
 
-        var card1 = new Card(Card.Color.DIAMONDS, Card.Suit.TEN);
-        var card2 = new Card(Card.Color.SPADES, Card.Suit.SIX);
-        var card3 = new Card(Card.Color.DIAMONDS, Card.Suit.EIGHT);
-        var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
+        var card1 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.TEN);
+        var card2 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.SIX);
+        var card3 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.EIGHT);
+        var card4 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.ACE);
 
         var tableStack = List.of(
                 card1,
@@ -65,12 +66,12 @@ class GameModeTest {
 
     @Test
     public void trump_stichWinningCard_noTrump() {
-        var testee = new GameMode.Trump(Card.Color.CLUBS);
+        var testee = new GameModes.Trump(State.Card.Color.CLUBS);
 
-        var card1 = new Card(Card.Color.DIAMONDS, Card.Suit.TEN);
-        var card2 = new Card(Card.Color.SPADES, Card.Suit.SIX);
-        var card3 = new Card(Card.Color.DIAMONDS, Card.Suit.EIGHT);
-        var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
+        var card1 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.TEN);
+        var card2 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.SIX);
+        var card3 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.EIGHT);
+        var card4 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.ACE);
 
         var tableStack = List.of(
                 card1,
@@ -86,12 +87,12 @@ class GameModeTest {
 
     @Test
     public void trump_stichWinningCard_jack() {
-        var testee = new GameMode.Trump(Card.Color.SPADES);
+        var testee = new GameModes.Trump(State.Card.Color.SPADES);
 
-        var card1 = new Card(Card.Color.DIAMONDS, Card.Suit.TEN);
-        var card2 = new Card(Card.Color.SPADES, Card.Suit.JACK);
-        var card3 = new Card(Card.Color.DIAMONDS, Card.Suit.EIGHT);
-        var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
+        var card1 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.TEN);
+        var card2 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.JACK);
+        var card3 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.EIGHT);
+        var card4 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.ACE);
 
         var tableStack = List.of(
                 card1,
@@ -107,12 +108,12 @@ class GameModeTest {
 
     @Test
     public void trump_stichWinningCard_nell() {
-        var testee = new GameMode.Trump(Card.Color.SPADES);
+        var testee = new GameModes.Trump(State.Card.Color.SPADES);
 
-        var card1 = new Card(Card.Color.DIAMONDS, Card.Suit.TEN);
-        var card2 = new Card(Card.Color.SPADES, Card.Suit.ACE);
-        var card3 = new Card(Card.Color.SPADES, Card.Suit.NINE);
-        var card4 = new Card(Card.Color.DIAMONDS, Card.Suit.ACE);
+        var card1 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.TEN);
+        var card2 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.ACE);
+        var card3 = new State.Card(State.Card.Color.SPADES, State.Card.Suit.NINE);
+        var card4 = new State.Card(State.Card.Color.DIAMONDS, State.Card.Suit.ACE);
 
         var tableStack = List.of(
                 card1,
