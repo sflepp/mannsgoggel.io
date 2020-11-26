@@ -5,7 +5,6 @@ import io.mannsgoggel.gamejass.domain.game.state.CardDeck;
 import io.mannsgoggel.gamejass.domain.game.state.State;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
 import static io.mannsgoggel.gamejass.domain.CollectionShortcuts.map;
@@ -57,7 +56,15 @@ public class JassGame implements Consumer<State> {
             case HAND_OUT_CARDS -> {
                 store.dispatch(new HandOutCards(CardDeck.buildAndShuffle(players, state.getPlayingMode())));
             }
-            case SET_STARTING_PLAYER -> store.dispatch(new SetStartingPlayer(players.get(new Random().nextInt(players.size()))));
+            case SET_STARTING_PLAYER -> {
+                var startingPlayer = state.getCards().stream()
+                        .filter(c -> c.getCard().equals(new State.Card(State.Card.Color.SPADES, State.Card.Suit.TEN)))
+                        .findAny()
+                        .orElseThrow()
+                        .getPlayer();
+
+                store.dispatch(new SetStartingPlayer(startingPlayer));
+            }
             case END_STICH -> store.dispatch(new EndStich());
             case END_ROUND -> store.dispatch(new EndRound());
             case END_GAME -> store.dispatch(new EndGame());

@@ -1,4 +1,4 @@
-package io.mannsgoggel.tournamentserver.games.jass.dto;
+package io.mannsgoggel.tournamentserver.games.jass.websocket;
 
 import lombok.Value;
 

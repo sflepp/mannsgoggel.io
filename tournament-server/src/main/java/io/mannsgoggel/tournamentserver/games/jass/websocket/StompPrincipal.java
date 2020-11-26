@@ -1,4 +1,4 @@
-package io.mannsgoggel.tournamentserver.games.jass;
+package io.mannsgoggel.tournamentserver.games.jass.websocket;
 
 import java.security.Principal;
 

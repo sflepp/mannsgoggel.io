@@ -29,12 +29,6 @@ class JassGameTest {
                 .filter(state -> state.getNextAction().equals(END_ROUND))
                 .blockFirst();
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         var totalPoints = result.getTeams().stream()
                 .mapToInt(State.Team::getPoints)
                 .sum();

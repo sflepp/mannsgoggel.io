@@ -1,4 +1,4 @@
-package io.mannsgoggel.tournamentserver.games.jass.clients;
+package io.mannsgoggel.tournamentserver.games.jass.websocket;
 
 import io.mannsgoggel.gamejass.domain.game.action.RemoteAction;
 import io.mannsgoggel.gamejass.domain.game.action.RequestRemoteAction;
@@ -6,7 +6,6 @@ import io.mannsgoggel.gamejass.domain.game.state.State;
 import io.mannsgoggel.gamejass.domain.game.action.Actions;
 import io.mannsgoggel.gamejass.domain.game.strategy.RemotePlayerStrategy;
 import io.mannsgoggel.tournamentserver.games.jass.dto.GameOptions;
-import io.mannsgoggel.tournamentserver.games.jass.dto.WebsocketMessage;
 import lombok.Data;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
