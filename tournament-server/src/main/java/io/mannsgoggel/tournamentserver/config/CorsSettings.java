@@ -22,7 +22,7 @@ class CorsSettings implements Filter {
 
         var origin = request.getHeader("Origin");
 
-        if (allowedOrigins.contains(origin)) {
+        if (origin != null && allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
             response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
             response.setHeader("Access-Control-Allow-Headers", "x-requested-with");

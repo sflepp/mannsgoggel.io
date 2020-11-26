@@ -66,45 +66,6 @@
 			<version>2.10.2</version>
 		</dependency>
 
-
-		<!-- temporary -->
-		<!-- https://mvnrepository.com/artifact/org.webjars/webjars-locator-core -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>webjars-locator-core</artifactId>
-			<version>0.46</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.webjars/sockjs-client -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>sockjs-client</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.webjars/stomp-websocket -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>stomp-websocket</artifactId>
-			<version>2.3.3-1</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.webjars/bootstrap -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>bootstrap</artifactId>
-			<version>4.5.3</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.webjars/jquery -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>jquery</artifactId>
-			<version>3.5.1</version>
-		</dependency>
-
-
-		<!-- end temporary -->
-
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
