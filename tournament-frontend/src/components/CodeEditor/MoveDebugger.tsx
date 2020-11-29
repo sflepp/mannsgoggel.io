@@ -20,9 +20,6 @@ const mapStateToProps = (state: State): Props => {
 }
 
 const MoveDebugger = (state: Props) => {
-
-    console.log(state.actionResult);
-
     if (state.actionResult === undefined) {
         return <div>Game hast not started yet.</div>
     }

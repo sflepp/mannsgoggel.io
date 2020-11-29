@@ -17,7 +17,7 @@ const mapStateToProps = (state: State): CodeEditorState => {
 const onKeyDown = (e: KeyboardEvent) => {
     if (e.keyCode === 83 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
-        localStorage.setItem('playerCode', store.getState().editor.playerCode)
+        localStorage.setItem('playerCodeTS', store.getState().editor.playerCode)
         message.success('Saved your code in local storage.');
     }
 }

@@ -95,59 +95,85 @@ const initialState: State = {
         results: []
     },
     editor: {
-        playerCode: !!localStorage.getItem('playerCode') ? localStorage.getItem('playerCode') :
+        playerCode: !!localStorage.getItem('playerCodeTS') ? localStorage.getItem('playerCodeTS') :
             `
+
 /**
+ * «Gschobe»
  * Is called in the beginning of a round if you are the first player.
- *
- * @param {object[]} handCards  The cards in the players hands
- * @param {object} gameState    The current state of the game
- * @returns {boolean}           If your team mate should choose the playing mode («Gschobe»)
+ * Tells if the player wants to shift the game. 
  */
-function decideShift(handCards, gameState) {
+function decideShift(handCards: Card[], gameState: GameState): boolean {
+
+    // todo: Implement your strategy
+
     return false;
 }
 
 /**
- * This function chooses a playing mode. Following playing modes are valid:
- * 
- * TOP_DOWN, BOTTOM_UP, TRUMP_HEARTS, TRUMP_SPADES, TRUMP_DIAMONDS, TRUMP_CLUBS
- *
- * @param {object[]} handCards  The cards in the players hands
- * @param {object} gameState    The current state of the game
- * @returns {string}            The playing mode for this round
+ * Choose a playing mode.
  */
-function choosePlayingMode(handCards, gameState) {
-    return 'TRUMP_HEARTS';
+function choosePlayingMode(handCards: Card[], gameState: GameState): PlayingMode {
+    
+    // todo: Implement your strategy
+    
+    return 'TRUMP_HEARTS'; 
 }
 
 /**
- * This function is called whenever your player starts a «Stich». All hand cards can be played.
- * 
- * @param {object[]} handCards  The cards in the players hands
- * @param {object} gameState    The current state of the game
- * @returns {object}            The card to play as first player
+ * This function is called whenever your player starts a «Stich». 
+ * An element in the handCards array must be returned.
  */
-function startStich(handCards, gameState) {
+function startStich(handCards: Card[], gameState: GameState): Card {
+
+    // todo: Implement your strategy
+
     return playCard(handCards, handCards, [], gameState);
 }
 
 /**
- * This function is called whenever your player needs to play. Only the playableCards can be played.
- * 
- * @param {object[]} handCards      The cards in the players hands
- * @param {object[]} playableCards  The playable cards in the players hand
- * @param {object[]} tableStack     The cards laying on the table in correct order
- * @param {object} gameState        The current state of the game
- * @returns {object}                The card to play
+ * This function is called whenever your player needs to play. 
+ * An element in the playableCards array must be returned.
  */
-function playCard(handCards, playableCards, tableStack, gameState) {
-    console.log('handCards', handCards);
-    console.log('playableCards', playableCards);
-    console.log('tableStack', tableStack);
-    console.log('gameState', gameState);
+function playCard(handCards: Card[], playableCards: Card[], tableStack: Card[], gameState: GameState): Card {    
+    
+    // todo: Implement your strategy
     
     return playableCards[0];
+}
+
+type PlayingMode = 'TOP_DOWN' | 'BOTTOM_UP' | 'TRUMP_HEARTS' | 
+    'TRUMP_SPADES' | 'TRUMP_DIAMONDS' | 'TRUMP_CLUBS';
+
+interface Card {
+    color: 'HEARTS' | 'SPADES' | 'DIAMONDS' | 'CLUBS';
+    suit: 'ACE' | 'KING' | 'QUEEN' | 'JACK' | 'TEN' | 'NINE' | 'EIGHT' | 'SEVEN' | 'SIX';
+}
+
+interface GameState {
+    playerName: string;
+    revision: number;
+    nextAction: string;
+    nextPlayer: string;
+    playingMode: PlayingMode;
+    shifted: boolean;
+    teams: Team[];
+    cards: CardState[];
+}
+
+interface Team {
+    name: string;
+    players: string[];
+    points: number;
+}
+
+interface CardState {
+    card: Card;
+    player: string;
+    playOrder: number;
+    team: string;
+    isTrump: boolean;
+    points: number;
 }
 `
     }

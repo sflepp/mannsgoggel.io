@@ -1,3 +1,5 @@
+import { transformSync } from "@babel/core";
+
 const TIMEOUT = 1000;
 
 export interface CodeExecutionDescription {
@@ -37,7 +39,24 @@ const createWorker = (code: string): WorkerHolder => {
 
 export function codeExecutionWorker(code: string, execution: CodeExecutionDescription, useCache: boolean = false): Promise<CodeExecutionResult> {
     return new Promise((resolve: (value: CodeExecutionResult) => void) => {
-        const workerJavascript = `${code}
+
+        let transpiled;
+
+        try {
+            transpiled = transformSync(code, { presets: [[require('@babel/preset-typescript'), { allExtensions: true }]] });
+        } catch (e) {
+            return resolve({
+                ...execution,
+                ...{
+                    value: null,
+                    error: JSON.stringify({message: 'Your did not transpile.'}),
+                    fn: code,
+                    executionTime: 0
+                }
+            });
+        }
+
+        const workerJavascript = `${transpiled.code}
         var logFn = console.log;
         console.clear();
         
