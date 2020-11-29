@@ -1,26 +1,17 @@
 import React, { useEffect } from 'react';
-import Editor from 'react-simple-code-editor';
-// @ts-ignore
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
 import { CodeEditorState, State } from '../../reducers';
-import { updateCode } from '../../actions';
 import { connect } from 'react-redux';
 import store from '../../store';
-import { Affix, Col, message, Row } from 'antd';
+import { Affix, Col, message, Row } from 'antd/lib';
 import CodeTestRunner from "./CodeTestRunner";
 import GameDebugger from './GameDebugger';
 import JassGame from "../JassGame/JassGame";
 import StartNewGameButton from "./StartNewGameButton";
-// @ts-ignore
+import MonacoEditor from "react-monaco-editor/lib";
+import { updateCode } from "../../actions";
 
 const mapStateToProps = (state: State): CodeEditorState => {
     return state.editor;
-}
-
-const onValueChange = (code: string) => {
-    store.dispatch(updateCode(code))
 }
 
 const onKeyDown = (e: KeyboardEvent) => {
@@ -29,6 +20,10 @@ const onKeyDown = (e: KeyboardEvent) => {
         localStorage.setItem('playerCode', store.getState().editor.playerCode)
         message.success('Saved your code in local storage.');
     }
+}
+
+const onValueChange = (code: string) => {
+    store.dispatch(updateCode(code))
 }
 
 const CodeEditor = (state: CodeEditorState) => {
@@ -49,22 +44,24 @@ const CodeEditor = (state: CodeEditorState) => {
         </Row>
         <Row>
             <Col span={14}>
-                <div style={{ position: 'absolute', zIndex: 10, right: 16, top: 16, width: '100%', textAlign: 'center' }}>
+                <div style={{
+                    position: 'absolute',
+                    zIndex: 10,
+                    right: 16,
+                    top: 16,
+                    width: '100%',
+                    textAlign: 'center'
+                }}>
                     <Affix offsetTop={16}>
-                        <div style={{position: 'absolute', right: 0}}><StartNewGameButton/></div>
-                        <div style={{display: 'inline-block', paddingTop: '4px'}}><CodeTestRunner/></div>
+                        <div style={{ position: 'absolute', right: 0 }}><StartNewGameButton/></div>
+                        <div style={{ display: 'inline-block', paddingTop: '4px' }}><CodeTestRunner/></div>
                     </Affix>
                 </div>
-                <Editor
+                <MonacoEditor
+                    language="typescript"
+                    theme="vs-dark"
                     value={state.playerCode}
-                    onValueChange={onValueChange}
-                    highlight={code => highlight(code, languages.js)}
-                    padding={20}
-                    style={{
-                        fontFamily: '"Fira code", "Fira Mono", monospace',
-                        fontSize: 16,
-                    }}
-                    className="container__editor"
+                    onChange={onValueChange}
                 />
             </Col>
             <Col span={10}>

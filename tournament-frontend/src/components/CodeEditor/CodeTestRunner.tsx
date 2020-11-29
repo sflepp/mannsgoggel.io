@@ -2,7 +2,7 @@ import { CodeTestState, State } from '../../reducers';
 import { connect } from 'react-redux';
 import React from 'react';
 import { Action, codeTestResult } from '../../actions';
-import { Alert, Badge, Popover } from 'antd';
+import { Alert, Badge, Popover } from 'antd/lib';
 import { codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 

@@ -11,11 +11,13 @@
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "antd": "^4.7.3",
+    "monaco-themes": "^0.3.3",
     "prismjs": "^1.22.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-json-prettify": "^0.2.0",
     "react-json-view": "^1.19.1",
+    "react-monaco-editor": "^0.40.0",
     "react-redux": "^7.2.1",
     "react-scripts": "3.4.4",
     "react-simple-code-editor": "^0.11.0",
@@ -53,6 +55,7 @@
     "cross-env": "^7.0.2",
     "customize-cra": "^1.0.0",
     "customize-cra-react-refresh": "^1.1.0",
+    "monaco-editor-webpack-plugin": "^2.0.0",
     "react-app-rewired": "^2.1.6"
   }
 }
