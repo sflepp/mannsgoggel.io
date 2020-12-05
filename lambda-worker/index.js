@@ -5,44 +5,25 @@ exports.handler = async (event, context) => {
     console.log('Received event:', JSON.stringify(event, null, 2));
     console.log('Received context: ', JSON.stringify(context, null, 2));
 
-    eval(event.strategyCode);
+    const blobUrl = URL.createObjectURL(new Blob([event.strategyCode], { type: 'text/javascript' }));
+    const strategy = new (await import(blobUrl)).default();
 
-    switch (event.parameters.action) {
-        case 'DECIDE_SHIFT':
-            return {
-                actionType: event.parameters.action,
-                payload: decideShift(
-                    event.parameters.handCards,
-                    event.parameters.gameState
-                ),
-            }
-        case 'SET_PLAYING_MODE':
-            return {
-                actionType: event.parameters.action,
-                payload: choosePlayingMode(
-                    event.parameters.handCards,
-                    event.parameters.gameState
-                ),
-            }
-        case 'START_STICH':
-            return {
-                actionType: event.parameters.action,
-                payload: startStich(
-                    event.parameters.handCards,
-                    event.parameters.gameState
-                ),
-            }
-        case 'PLAY_CARD':
-            return {
-                actionType: event.parameters.action,
-                payload: playCard(
-                    event.parameters.handCards,
-                    event.parameters.playableCards,
-                    event.parameters.tableStack,
-                    event.parameters.gameState
-                ),
-            }
-        default:
-            throw Error(`Action ${event.parameters.action} is unknown.`);
+    return {
+        actionType: event.parameters.action,
+        payload: execute(strategy, event.parameters.action, event.parameters),
     }
 };
+
+const execute = (strategy, action, parameters) => {
+    switch (action) {
+        case 'DECIDE_SHIFT':
+            return strategy.shift(parameters.handCards, parameters.gameState);
+        case 'SET_PLAYING_MODE':
+            return strategy.playingMode(parameters.handCards, parameters.gameState);
+        case 'PLAY_CARD':
+        case 'START_STICH':
+            return strategy.play(parameters.handCards, parameters.playableCards, parameters.tableStack, parameters.gameState);
+        default:
+            throw Error(`Action ${action} is unknown.`);
+    }
+}
