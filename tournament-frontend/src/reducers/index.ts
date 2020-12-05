@@ -98,49 +98,46 @@ const initialState: State = {
         playerCode: !!localStorage.getItem('playerCodeTS') ? localStorage.getItem('playerCodeTS') :
             `
 
-/**
- * «Gschobe»
- * Is called in the beginning of a round if you are the first player.
- * Tells if the player wants to shift the game. 
- */
-function decideShift(handCards: Card[], gameState: GameState): boolean {
-
-    // todo: Implement your strategy
-
-    return false;
-}
 
 /**
- * Choose a playing mode.
+ * Your Jass strategy
  */
-function choosePlayingMode(handCards: Card[], gameState: GameState): PlayingMode {
-    
-    // todo: Implement your strategy
-    
-    return 'TRUMP_HEARTS'; 
+class MyJassStrategy implements Strategy {
+    /**
+     * «Gschobe»
+     * Is called in the beginning of a round if you are the first player.
+     * Tells if the player wants to shift the game. 
+     */
+    shift(hand: Card[], state: GameState): boolean {
+
+        // todo: Implement your strategy
+
+        return false;
+    }
+
+    /**
+     * Choose a playing mode.
+     */
+    playingMode(hand: Card[], state: GameState): PlayingMode {
+        
+        // todo: Implement your strategy
+        
+        return 'TRUMP_HEARTS'; 
+    }
+   
+    /**
+     * This function is called whenever your player needs to play a card. 
+     * An element in the playableCards array must be returned.
+     */
+    play(hand: Card[], playable: Card[], table: Card[], state: GameState): Card {    
+        
+        // todo: Implement your strategy
+        
+        return playable[0];
+    }
 }
 
-/**
- * This function is called whenever your player starts a «Stich». 
- * An element in the handCards array must be returned.
- */
-function startStich(handCards: Card[], gameState: GameState): Card {
-
-    // todo: Implement your strategy
-
-    return playCard(handCards, handCards, [], gameState);
-}
-
-/**
- * This function is called whenever your player needs to play. 
- * An element in the playableCards array must be returned.
- */
-function playCard(handCards: Card[], playableCards: Card[], tableStack: Card[], gameState: GameState): Card {    
-    
-    // todo: Implement your strategy
-    
-    return playableCards[0];
-}
+// Type definition
 
 type PlayingMode = 'TOP_DOWN' | 'BOTTOM_UP' | 'TRUMP_HEARTS' | 
     'TRUMP_SPADES' | 'TRUMP_DIAMONDS' | 'TRUMP_CLUBS';
@@ -175,6 +172,18 @@ interface CardState {
     isTrump: boolean;
     points: number;
 }
+
+/**
+ * Interface to implement, do not change.
+ */
+interface Strategy {
+    shift(hand: Card[], state: GameState): boolean;
+    playingMode(hand: Card[], state: GameState): PlayingMode;
+    play(hand: Card[], playable: Card[], table: Card[], state: GameState): Card;
+}
+
+export default MyJassStrategy
+
 `
     }
 };

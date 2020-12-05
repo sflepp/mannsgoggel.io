@@ -14,8 +14,6 @@ const mapStateToProps = (state: State) => {
 }
 
 export const JassBoardView = (state: Props) => {
-    console.log(state);
-
     if (state.gameState === null) {
         return <div>Game has not started yet.</div>
     }

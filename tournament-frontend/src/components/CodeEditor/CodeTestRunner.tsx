@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import { Action, codeTestResult } from '../../actions';
 import { Alert, Badge, Popover } from 'antd/lib';
-import { codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
+import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 
 interface ClassStateValues {
@@ -21,16 +21,7 @@ function mapStateToProps(state: State): ClassStateValues {
 export function* runTestsSaga() {
     yield takeLatest('UPDATE_CODE', function* (action: Action) {
         try {
-            const tests = [
-                {
-                    description: 'decideShift() should return a boolean',
-                    fn: `typeof decideShift([], []) === 'boolean'`
-                },
-                {
-                    description: 'choosePlayingMode() should return valid playing mode',
-                    fn: `['TOP_DOWN', 'BOTTOM_UP', 'TRUMP_HEARTS', 'TRUMP_SPADES', 'TRUMP_DIAMONDS', 'TRUMP_CLUBS'].includes(choosePlayingMode([], {}))`
-                }
-            ];
+            const tests: CodeExecutionDescription[] = [];
 
             yield put(codeTestResult([]));
 
@@ -38,15 +29,16 @@ export function* runTestsSaga() {
                 const currentTestResults = (yield select((state: State) => state.codeTest.results));
                 yield put(codeTestResult([
                     ...currentTestResults,
-                    (yield call(codeExecutionWorker, action.payload, tests[i], true))
+                    (yield call(codeExecutionWorker, tests[i]))
                 ]));
             }
 
         } catch (error) {
             yield put(codeTestResult([{
+                action: action.payload.action,
                 description: 'Syntax error',
-                fn: action.payload,
                 executionTime: 0,
+                code: action.payload,
                 error: JSON.stringify(error)
             }]));
         }

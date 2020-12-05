@@ -3,158 +3,98 @@ import { transformSync } from "@babel/core";
 const TIMEOUT = 1000;
 
 export interface CodeExecutionDescription {
-    description: string,
-    fn: string
+  description: string,
+  code: string,
+  action: string;
+  parameters: any;
 }
 
 export interface CodeExecutionResult {
-    description: string,
-    fn: string,
-    executionTime: number,
-    consoleOutput?: ConsoleLog[],
-    result?: string,
-    error?: string
+  description: string,
+  executionTime: number,
+  consoleOutput?: ConsoleLog[],
+  action: string,
+  code: string,
+  result?: string,
+  error?: string
 }
 
 export interface ConsoleLog {
-    level: 'log' | 'error';
-    payload: any[];
+  level: 'log' | 'error';
+  payload: any[];
 }
 
-interface WorkerHolder { url: string, worker: Worker };
+export function codeExecutionWorker(execution: CodeExecutionDescription): Promise<CodeExecutionResult> {
+  return new Promise((resolve: (value: CodeExecutionResult) => void) => {
 
-const cache = new Map<number, WorkerHolder>();
+    let transpiled;
 
-const hashCode = (s: string) => {
-    return s.split("").reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a
-    }, 0);
-}
-
-const createWorker = (code: string): WorkerHolder => {
-    const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }))
-    return { url: blobUrl, worker: new Worker(blobUrl) };
-}
-
-export function codeExecutionWorker(code: string, execution: CodeExecutionDescription, useCache: boolean = false): Promise<CodeExecutionResult> {
-    return new Promise((resolve: (value: CodeExecutionResult) => void) => {
-
-        let transpiled;
-
-        try {
-            transpiled = transformSync(code, { presets: [[require('@babel/preset-typescript'), { allExtensions: true }]] });
-        } catch (e) {
-            return resolve({
-                ...execution,
-                ...{
-                    value: null,
-                    error: JSON.stringify({message: 'Your did not transpile.'}),
-                    fn: code,
-                    executionTime: 0
-                }
-            });
+    try {
+      transpiled = transformSync(execution.code, { presets: [[require('@babel/preset-typescript'), { allExtensions: true }]] });
+    } catch (e) {
+      return resolve({
+        ...execution,
+        ...{
+          value: null,
+          error: JSON.stringify({ message: 'Your code did not transpile.' }),
+          executionTime: 0,
+          code: execution.code
         }
+      });
+    }
 
-        const workerJavascript = `${transpiled.code}
-        var logFn = console.log;
-        console.clear();
-        
-        self.addEventListener('message', function(event) {
-            var log = [];
-        
-            console.log = (...args) => {
-                log.push({level: 'log', payload: args });
-                logFn('worker', ...args);
-            }
-        
-            var t0 = performance.now()
-            var result = eval(event.data.fn);
-            var t1 = performance.now()
-        
-            let execution;
-            var t0 = performance.now()
-            try {
-                var result = eval(event.data.fn);
-                
-                if (result === undefined || result === null) {
-                    throw new Error('Return value is ' + result);
-                }
-                
-                var t1 = performance.now()
-            
-                execution = { description: event.data.description, fn: event.data.fn, result: JSON.stringify(result), consoleOutput: log, executionTime: parseInt(t1 - t0) }
-            } catch (e) {
-                var t1 = performance.now()
-                execution = { description: event.data.description, fn: event.data.fn, error: e.message, consoleOutput: log, executionTime: parseInt(t1 - t0) }
-            }
-        
-            self.postMessage(execution);
-        }, false);`;
+    const compiledExecution = {
+      ...execution,
+      ...{ code: transpiled.code }
+    }
 
-        let workerHolder: WorkerHolder;
-        let hash: number;
+    const worker = new Worker('jass-worker/worker.js');
 
-        if (useCache) {
-            const hash = hashCode(workerJavascript);
-
-            if (!cache.has(hash)) {
-                cache.set(hash, createWorker(workerJavascript));
-            }
-
-            workerHolder = cache.get(hash);
-        } else {
-            workerHolder = createWorker(workerJavascript);
+    const timeout = setTimeout(() => {
+      forceKill();
+      resolve({
+        ...execution,
+        ...{
+          value: null,
+          error: JSON.stringify({ message: 'Your code is too slow and timed out after ' + TIMEOUT + ' ms' }),
+          executionTime: TIMEOUT,
+          code: execution.code
         }
+      });
+    }, TIMEOUT);
 
-        const timeout = setTimeout(() => {
-            forceKill();
-            resolve({
-                ...execution,
-                ...{
-                    value: null,
-                    error: JSON.stringify({message: 'Your code is too slow and timed out after ' + TIMEOUT + ' ms'}),
-                    fn: code,
-                    executionTime: TIMEOUT
-                }
-            });
-        }, TIMEOUT);
+    const kill = () => {
+      clearTimeout(timeout);
+      worker.terminate();
+    }
 
-        const kill = () => {
-            clearTimeout(timeout);
+    const forceKill = () => {
+      clearTimeout(timeout);
+      worker.terminate();
+    }
 
-            if (!useCache) {
-                workerHolder.worker.terminate();
-                URL.revokeObjectURL(workerHolder.url);
-            }
-        }
+    worker.onmessage = (event) => {
+      kill();
+      resolve({
+        ...event.data,
+          ...{code: execution.code}
+      });
+    }
 
-        const forceKill = () => {
-            clearTimeout(timeout);
-            cache.delete(hash);
-            workerHolder.worker.terminate();
-            URL.revokeObjectURL(workerHolder.url);
-        }
-
-        workerHolder.worker.onmessage = (event) => {
-            kill();
-            resolve(event.data);
-        }
-
-        workerHolder.worker.onerror = (error) => {
-            kill();
-            if (error.message !== undefined) {
-                resolve({
-                    ...execution,
-                    ...{
-                        value: null,
-                        error: error.message,
-                        fn: code,
-                        executionTime: 0
-                    }
-                });
-            }
-        }
-        workerHolder.worker.postMessage(execution);
-    });
+    worker.onerror = (error) => {
+      kill();
+      if (error.message !== undefined) {
+        resolve({
+          ...execution,
+          ...{
+            value: null,
+            error: error.message,
+            executionTime: 0,
+            code: execution.code
+          }
+        });
+      }
+    }
+    worker.postMessage(compiledExecution);
+  });
 }

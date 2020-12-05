@@ -24,8 +24,8 @@ const MoveDebugger = (state: Props) => {
         return <div>Game hast not started yet.</div>
     }
 
-    const functionName = state.actionResult.fn.match(/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/g)[0];
-    const functionParameters = JSON.parse(`[${state.actionResult.fn.match(/\b[^()]+\((.*)\)$/)[1]}]`);
+    const functionName = state.actionResult.code.match(/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/g)[0];
+    const functionParameters = JSON.parse(`[${state.actionResult.code.match(/\b[^()]+\((.*)\)$/)[1]}]`);
 
     let functionRegex = /function\s+(?<name>\w+)\s*\((?<arguments>(?:[^()]+)*)?\s*\)/g,
         match,
@@ -66,7 +66,7 @@ const MoveDebugger = (state: Props) => {
             <Col span={24}>
                 <h3>Function call</h3>
                 <pre>{functionName}</pre>
-                {!!state.actionResult.fn && functionParameters.map((parameter: any, i: number) => (
+                {!!state.actionResult.code && functionParameters.map((parameter: any, i: number) => (
                     <div key={i} style={{ paddingLeft: '20px' }}>
                         <ReactJson
                             theme={'grayscale:inverted'}

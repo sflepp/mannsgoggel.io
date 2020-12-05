@@ -1,5 +1,5 @@
 import React from 'react';
-import { RemoteActionRequest, State, WebsocketMessage } from '../../reducers';
+import { State, WebsocketMessage } from '../../reducers';
 // @ts-ignore
 import SockJsClient from 'react-stomp';
 import {
@@ -11,38 +11,11 @@ import {
     updateGameState
 } from '../../actions';
 import store from '../../store';
-import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
+import { codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { actionChannel, call, delay, put, select, take, takeEvery } from 'redux-saga/effects'
 import config from "../../config";
 
 let webSocket: any;
-
-const evaluateFunction = (action: RemoteActionRequest): CodeExecutionDescription => {
-    switch (action.action) {
-        case 'DECIDE_SHIFT':
-            return {
-                description: 'DECIDE_SHIFT',
-                fn: `decideShift(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
-            };
-        case 'SET_PLAYING_MODE':
-            return {
-                description: 'SET_PLAYING_MODE',
-                fn: `choosePlayingMode(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
-            };
-        case 'START_STICH':
-            return {
-                description: 'START_STICH',
-                fn: `startStich(${JSON.stringify(action.handCards)},${JSON.stringify(action.gameState)})`
-            };
-        case 'PLAY_CARD':
-            return {
-                description: 'PLAY_CARD',
-                fn: `playCard(${JSON.stringify(action.handCards)},${JSON.stringify(action.playableCards)},${JSON.stringify(action.tableStack)},${JSON.stringify(action.gameState)})`
-            }
-        default:
-            throw new Error(`Unknown action: ${JSON.stringify(action)}`);
-    }
-}
 
 export function* handleBackpressure() {
     const channel = yield actionChannel('QUEUE_WEBSOCKET_MESSAGE');
@@ -79,8 +52,12 @@ export function* newGameSaga() {
 export function* calculateSaga() {
     yield takeEvery('SET_ACTION_REQUEST', function* (action: Action) {
         const code = yield select((state: State) => state.editor.playerCode);
-        const result = yield call(codeExecutionWorker, code, evaluateFunction(action.payload), true);
-        console.log(result);
+        const result = yield call(codeExecutionWorker, {
+            description: `Remote request ${action.payload.action}`,
+            code: code,
+            action: action.payload.action,
+            parameters: action.payload
+        });
         yield put(setResultCodeExecution(result))
     });
 }
@@ -89,7 +66,7 @@ export function* sendActionSaga() {
     yield takeEvery('SET_ACTION_RESULT', (action: Action) => {
         if (action.payload.result !== undefined) {
             webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                actionType: action.payload.description,
+                actionType: action.payload.action,
                 payload: JSON.parse(action.payload.result)
             }));
         }
