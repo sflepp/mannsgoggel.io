@@ -33,9 +33,6 @@ public class LocalPlayer extends Player {
                     new SetPlayingMode(getName(), strategy.choosePlayingMode(handCards(state, getName()), playerView))
             );
 
-            case START_STICH -> getStore().dispatch(
-                    new StartStich(getName(), strategy.startStich(handCards(state, getName()), playerView))
-            );
             case PLAY_CARD -> getStore().dispatch(
                     new PlayCard(
                             getName(),

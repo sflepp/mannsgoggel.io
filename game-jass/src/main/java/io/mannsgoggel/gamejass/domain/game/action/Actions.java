@@ -20,7 +20,6 @@ public class Actions {
         SET_STARTING_PLAYER,
         DECIDE_SHIFT,
         SET_PLAYING_MODE,
-        START_STICH,
         PLAY_CARD,
         END_STICH,
         END_ROUND,
@@ -139,13 +138,7 @@ public class Actions {
                 newState.nextPlayer(teamMate);
             }
 
-            return newState.nextAction(START_STICH);
-        }
-    }
-
-    public static class StartStich extends PlayCard {
-        public StartStich(String player, State.Card payload) {
-            super(START_STICH, player, payload);
+            return newState.nextAction(PLAY_CARD);
         }
     }
 
@@ -207,7 +200,7 @@ public class Actions {
 
             return intermediateState.toBuilder()
                     .nextPlayer(roundFinished(intermediateState) ? null : winningCardState.getPlayer())
-                    .nextAction(roundFinished(intermediateState) ? END_ROUND : START_STICH);
+                    .nextAction(roundFinished(intermediateState) ? END_ROUND : PLAY_CARD);
         }
     }
 

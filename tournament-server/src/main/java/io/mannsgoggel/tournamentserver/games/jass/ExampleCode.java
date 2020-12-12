@@ -28,17 +28,6 @@ public class ExampleCode {
             "}\n" +
             "\n" +
             "/**\n" +
-            " * This function is called whenever your player starts a «Stich». All hand cards can be played.\n" +
-            " * \n" +
-            " * @param {object[]} handCards  The cards in the players hands\n" +
-            " * @param {object} gameState    The current state of the game\n" +
-            " * @returns {object}            The card to play as first player\n" +
-            " */\n" +
-            "function startStich(handCards, gameState) {\n" +
-            "    return playCard(handCards, handCards, [], gameState);\n" +
-            "}\n" +
-            "\n" +
-            "/**\n" +
             " * This function is called whenever your player needs to play. Only the playableCards can be played.\n" +
             " * \n" +
             " * @param {object[]} handCards      The cards in the players hands\n" +

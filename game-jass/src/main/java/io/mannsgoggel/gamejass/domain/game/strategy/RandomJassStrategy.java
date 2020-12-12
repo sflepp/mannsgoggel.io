@@ -18,11 +18,6 @@ public class RandomJassStrategy implements PlayerStrategy {
     }
 
     @Override
-    public State.Card startStich(List<State.Card> handCards, State state) {
-        return handCards.get(new Random().nextInt(handCards.size()));
-    }
-
-    @Override
     public State.Card playCard(List<State.Card> handCards, List<State.Card> playableCards, List<State.Card> tableStack, State state) {
         return playableCards.get(new Random().nextInt(playableCards.size()));
     }

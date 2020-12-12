@@ -21,7 +21,6 @@ const execute = (strategy, action, parameters) => {
         case 'SET_PLAYING_MODE':
             return strategy.playingMode(parameters.handCards, parameters.gameState);
         case 'PLAY_CARD':
-        case 'START_STICH':
             return strategy.play(parameters.handCards, parameters.playableCards, parameters.tableStack, parameters.gameState);
         default:
             throw Error(`Action ${action} is unknown.`);

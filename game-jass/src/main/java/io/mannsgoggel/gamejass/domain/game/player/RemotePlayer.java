@@ -59,11 +59,6 @@ public class RemotePlayer extends Player {
                                 objectMapper.treeToValue(remoteAction.getPayload(), GameModes.GameMode.PlayingMode.class)
                         )
                 );
-                case START_STICH -> getStore().dispatch(new StartStich(
-                                getName(),
-                                objectMapper.treeToValue(remoteAction.getPayload(), State.Card.class)
-                        )
-                );
                 case PLAY_CARD -> getStore().dispatch(new PlayCard(
                                 getName(),
                                 objectMapper.treeToValue(remoteAction.getPayload(), State.Card.class)

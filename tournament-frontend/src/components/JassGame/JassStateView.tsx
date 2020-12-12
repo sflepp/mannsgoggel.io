@@ -31,8 +31,6 @@ const mapNextActionToHumanReadable = (state: GameState) => {
             return 'Start game';
         case 'HAND_OUT_CARDS':
             return 'Hand out cards';
-        case 'START_STICH':
-            return 'Start stich';
         case 'END_STICH':
             return 'End stich';
         case 'END_ROUND':
