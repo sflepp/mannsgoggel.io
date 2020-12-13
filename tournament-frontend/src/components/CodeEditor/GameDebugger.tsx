@@ -8,7 +8,6 @@ import store from '../../store';
 // @ts-ignore
 import { SelectValue } from 'antd/lib/select';
 import MoveDebugger from './MoveDebugger';
-import { ConsoleView } from "./ConsoleView";
 import JassBoardView from "../JassGame/JassBoardView";
 import JassStateView from "../JassGame/JassStateView";
 
@@ -48,20 +47,11 @@ const stateFilter = (state: GameDebuggerState, value: 'ALL' | 'PLAYER_ONLY') => 
 }
 
 const GameDebugger = (state: State) => {
-    const consoleLogs = state.actionResult?.consoleOutput || [];
-
     const debuggerTitle = (
         <div style={{ width: '100%'}}>
             Debugger
             {state.paused && <span style={{float: 'right'}}><Badge offset={[0,-3]} count={1}/></span>}
         </div>)
-
-    const consoleTitle = (
-        <div style={{ width: '100%'}}>
-            Console
-            {state.paused && <span style={{float: 'right'}}><Badge offset={[0,-3]} count={consoleLogs.length}/></span>}
-        </div>
-    );
 
     const stateTitle = (
         <div style={{ width: '100%'}}>
@@ -116,9 +106,6 @@ const GameDebugger = (state: State) => {
                         </Panel>
                         <Panel header={debuggerTitle} key="debugger">
                             <MoveDebugger/>
-                        </Panel>
-                        <Panel header={consoleTitle} key="console">
-                            <ConsoleView logs={consoleLogs}/>
                         </Panel>
                     </Collapse>
                 </div>

@@ -58,6 +58,7 @@ const CodeEditor = (state: CodeEditorState) => {
                     </Affix>
                 </div>
                 <MonacoEditor
+                    options={{automaticLayout: true}}
                     language="typescript"
                     theme="vs-dark"
                     value={state.playerCode}

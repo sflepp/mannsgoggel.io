@@ -1,7 +1,7 @@
 import { ConsoleLog } from "../../services/CodeExecutionWebWorker";
 import React from "react";
-import { JSONObject } from "../ui/JSONObject";
 import { Divider } from "antd";
+import JSONObject from "../ui/JSONObject";
 
 export const ConsoleView = (props: { logs: ConsoleLog[] }) => {
 

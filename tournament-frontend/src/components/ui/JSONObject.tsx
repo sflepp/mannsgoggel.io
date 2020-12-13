@@ -1,20 +1,20 @@
-import React from "react";
+import React from 'react';
 
-const ReactJson = require("react-json-view");
+import ReactJson from 'react-json-view'
 
 
-export const JSONObject = (props: { name: string, object: any, collapsed?: number }) => {
-    return <div>
-        <ReactJson
-            theme={'grayscale:inverted'}
-            iconStyle={'triangle'}
-            indentWidth={2}
-            style={{ display: 'inline-block' }}
-            name={props.name}
-            collapsed={props.collapsed}
-            enableClipboard={false}
-            displayObjectSize={false}
-            displayDataTypes={false}
-            src={props.object}/>
-    </div>
+const JSONObject = (props: { name: string, object: any, collapsed?: number }) => {
+  return <ReactJson
+      theme={'grayscale:inverted'}
+      iconStyle={'triangle'}
+      indentWidth={2}
+      style={{ display: 'inline-block' }}
+      name={props.name}
+      collapsed={props.collapsed}
+      enableClipboard={false}
+      displayObjectSize={false}
+      displayDataTypes={false}
+      src={props.object}/>
 }
+
+export default JSONObject

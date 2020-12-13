@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import { Action, codeTestResult } from '../../actions';
 import { Alert, Badge, Popover } from 'antd/lib';
-import { CodeExecutionDescription, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
+import { CodeExecutionRequest, codeExecutionWorker } from '../../services/CodeExecutionWebWorker';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 
 interface ClassStateValues {
@@ -21,7 +21,7 @@ function mapStateToProps(state: State): ClassStateValues {
 export function* runTestsSaga() {
     yield takeLatest('UPDATE_CODE', function* (action: Action) {
         try {
-            const tests: CodeExecutionDescription[] = [];
+            const tests: CodeExecutionRequest[] = [];
 
             yield put(codeTestResult([]));
 
@@ -35,11 +35,11 @@ export function* runTestsSaga() {
 
         } catch (error) {
             yield put(codeTestResult([{
-                action: action.payload.action,
-                description: 'Syntax error',
+                consoleOutput: [],
+                request: action.payload,
                 executionTime: 0,
-                code: action.payload,
-                error: JSON.stringify(error)
+                error: JSON.stringify(error),
+                result: null,
             }]));
         }
     });
@@ -51,17 +51,17 @@ const CodeTestRunner = (state: ClassStateValues) => {
         let status: 'error' | 'success';
 
         if (result.error !== undefined) {
-            content = <Alert message="Failed" description={result.description} type="error" showIcon/>;
+            content = <Alert message="Failed" description={result.request.description} type="error" showIcon/>;
             status = 'error';
         } else if (result.result !== 'true') {
-            content = <Alert message="Failed" description={result.description} type="error" showIcon/>
+            content = <Alert message="Failed" description={result.request.description} type="error" showIcon/>
             status = 'error';
         } else {
-            content = <Alert message="Success" description={result.description} type="success" showIcon/>
+            content = <Alert message="Success" description={result.request.description} type="success" showIcon/>
             status = 'success';
         }
 
-        return <Popover placement="bottom" key={result.description} content={content}><Badge
+        return <Popover placement="bottom" key={result.request.description} content={content}><Badge
             status={status}/></Popover>
     });
 

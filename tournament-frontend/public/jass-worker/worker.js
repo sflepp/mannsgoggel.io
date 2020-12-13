@@ -11,7 +11,7 @@ self.addEventListener('message', async (event) => {
 
     const t0 = performance.now();
     try {
-        const blobUrl = URL.createObjectURL(new Blob([event.data.code], { type: 'text/javascript' }));
+        const blobUrl = URL.createObjectURL(new Blob([event.data.compiledCode], { type: 'text/javascript' }));
         const strategy = new (await import(blobUrl)).default();
         const result = execute(strategy, event.data.action, event.data.parameters);
         const t1 = performance.now()
@@ -21,22 +21,20 @@ self.addEventListener('message', async (event) => {
         }
 
         self.postMessage({
-            action: event.data.action,
-            description: event.data.description,
-            result: JSON.stringify(result),
             consoleOutput: log,
-            executionTime: parseInt(t1 - t0)
+            executionTime: parseInt(t1 - t0),
+            result: JSON.stringify(result),
+            error: null,
         });
 
     } catch (e) {
         console.error(e);
         const t1 = performance.now()
         self.postMessage({
-            action: event.data.action,
-            description: event.data.description,
-            error: e.message,
             consoleOutput: log,
-            executionTime: parseInt(t1 - t0)
+            executionTime: parseInt(t1 - t0),
+            result: null,
+            error: e.message,
         })
     }
 }, false);

@@ -1,101 +1,102 @@
-import { State } from '../../reducers';
-import { connect } from 'react-redux';
-import React from 'react';
 import { Col, Divider, Row } from 'antd';
-import { CodeExecutionResult } from '../../services/CodeExecutionWebWorker';
-import { JSONObject } from "../ui/JSONObject";
-
-const ReactJson = require('react-json-view');
+import React from 'react';
+import { connect } from 'react-redux';
+import { State } from '../../reducers';
+import { CodeExecutionRequest, CodeExecutionResult } from '../../services/CodeExecutionWebWorker';
+import DebugParameter from "../ui/DebugParameter";
+import { ConsoleView } from "./ConsoleView";
 
 interface Props {
-    code: string;
-    actionResult: CodeExecutionResult;
+  code: string;
+  actionResult: CodeExecutionResult;
 }
 
 const mapStateToProps = (state: State): Props => {
-    return {
-        code: state.editor.playerCode,
-        actionResult: state.actionResult,
-    };
+  return {
+    code: state.editor.playerCode,
+    actionResult: state.actionResult,
+  };
 }
 
+const calculateFunctionName = (action: string) => {
+  switch (action) {
+    case 'DECIDE_SHIFT':
+      return 'shift';
+    case 'SET_PLAYING_MODE':
+      return 'playingMode';
+    case 'PLAY_CARD':
+      return 'play';
+  }
+}
+
+const calculateParameterNames = (action: string) => {
+  switch (action) {
+    case 'DECIDE_SHIFT':
+      return ['hand', 'state'];
+    case 'SET_PLAYING_MODE':
+      return ['hand', 'state'];
+    case 'PLAY_CARD':
+      return ['hand', 'playable', 'table', 'state'];
+  }
+}
+
+const calculateFunctionArguments = (request: CodeExecutionRequest) => {
+  switch (request.action) {
+    case 'DECIDE_SHIFT':
+      return [request.parameters.handCards, request.parameters.state];
+    case 'SET_PLAYING_MODE':
+      return [request.parameters.handCards, request.parameters.state];
+    case 'PLAY_CARD':
+      return [request.parameters.handCards, request.parameters.playableCards, request.parameters.tableCards, request.parameters.state];
+  }
+}
+
+
 const MoveDebugger = (state: Props) => {
-    if (state.actionResult === undefined) {
-        return <div>Game hast not started yet.</div>
-    }
+  if (state.actionResult === undefined) {
+    return (<div>Game hast not started yet.</div>)
+  }
 
-    const functionName = state.actionResult.code.match(/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/g)[0];
-    const functionParameters = JSON.parse(`[${state.actionResult.code.match(/\b[^()]+\((.*)\)$/)[1]}]`);
+  const functionName = calculateFunctionName(state.actionResult.request.action)
+  const parameterNames = calculateParameterNames(state.actionResult.request.action);
+  const argumentsPayload = calculateFunctionArguments(state.actionResult.request);
 
-    let functionRegex = /function\s+(?<name>\w+)\s*\((?<arguments>(?:[^()]+)*)?\s*\)/g,
-        match,
-        matches = [];
+  const consoleLogs = state.actionResult?.consoleOutput || [];
 
-    // eslint-disable-next-line
-    while (match = functionRegex.exec(state.code)) {
-        matches.push(match.groups);
-    }
-
-    const functionDefinition = matches.find((match) => match.name === functionName);
-    const argumentNames = functionDefinition.arguments.split(',').map(s => s.trim());
-
-
-    let result;
-
-    if (state.actionResult.result !== undefined) {
-        if (typeof JSON.parse(state.actionResult.result) === 'object') {
-            result = <JSONObject name={'result'} object={JSON.parse(state.actionResult.result)}/>
-        } else {
-            result = <span style={{ fontFamily: 'monospace' }}>{state.actionResult.result}</span>;
-        }
-    }
-
-    return <div>
-        <Row>
-            <Col span={18}>
-                <h3>Next move</h3>
-                <span style={{ fontFamily: 'monospace' }}>{functionName}({argumentNames.join(", ")});</span>
-            </Col>
-            <Col span={6} style={{textAlign: 'right'}}>
-                <h3>Execution time</h3>
-                <span style={{ fontFamily: 'monospace' }}>{state.actionResult.executionTime} ms</span>
-            </Col>
-        </Row>
+  return <div>
+    <Row>
+      <Col span={24}>
+        <h3>Executed function (<span>{state.actionResult.executionTime} ms</span>)</h3>
+        <span
+          style={{ fontFamily: 'monospace' }}>
+          const <DebugParameter name={'result'} object={state.actionResult.result}
+                                isLast={true}/>&nbsp;= Strategy.{functionName}({parameterNames
+          .map((parameterName: string, i: number) => {
+            return <DebugParameter key={parameterName} name={parameterName} object={JSON.stringify(argumentsPayload[i])}
+                                   isLast={i === parameterNames.length - 1}/>
+          })});</span>
+      </Col>
+    </Row>
+    {state.actionResult.error && (
+      <>
         <Divider/>
         <Row>
-            <Col span={24}>
-                <h3>Function call</h3>
-                <pre>{functionName}</pre>
-                {!!state.actionResult.code && functionParameters.map((parameter: any, i: number) => (
-                    <div key={i} style={{ paddingLeft: '20px' }}>
-                        <ReactJson
-                            theme={'grayscale:inverted'}
-                            iconStyle={'triangle'}
-                            indentWidth={2}
-                            style={{ display: 'inline-block' }}
-                            name={argumentNames[i]}
-                            collapsed={true}
-                            enableClipboard={false}
-                            displayObjectSize={false}
-                            displayDataTypes={false}
-                            src={parameter}/>
-                    </div>)
-                )}
-                <pre>);</pre>
-            </Col>
+          {state.actionResult.error && <Col span={24}>
+              <h3>Error</h3>
+            {state.actionResult.error}
+          </Col>}
         </Row>
-        <Divider/>
-        <Row>
-            {state.actionResult.result && <Col span={12}>
-                <h3>Result</h3>
-                {result}
-            </Col>}
-            {state.actionResult.error && <Col span={24}>
-                <h3>Error</h3>
-                {state.actionResult.error}
-            </Col>}
-        </Row>
-    </div>
+      </>)}
+
+    <Divider/>
+
+    <Row>
+      <Col>
+      <h3>Console</h3>
+      <ConsoleView logs={consoleLogs}/>
+      </Col>
+    </Row>
+  </div>
 }
 
 export default connect(mapStateToProps)(MoveDebugger);

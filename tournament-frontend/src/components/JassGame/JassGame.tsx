@@ -19,15 +19,10 @@ let webSocket: any;
 
 export function* handleBackpressure() {
     const channel = yield actionChannel('QUEUE_WEBSOCKET_MESSAGE');
-    const pauseChannel = yield actionChannel('SET_PAUSED')
     while (true) {
         const action = (yield take(channel)).payload as WebsocketMessage;
         for (let i = 0; i < 100 - (yield select((state: State) => state.debugger.speed)); i++) {
             yield delay(10);
-        }
-
-        while ((yield select((state: State) => state.paused))) {
-            yield take(pauseChannel);
         }
 
         if (action.messageType === 'state') {
@@ -63,10 +58,15 @@ export function* calculateSaga() {
 }
 
 export function* sendActionSaga() {
-    yield takeEvery('SET_ACTION_RESULT', (action: Action) => {
+    const pauseChannel = yield actionChannel('SET_PAUSED')
+    yield takeEvery('SET_ACTION_RESULT', function* (action: Action) {
+        while ((yield select((state: State) => state.paused))) {
+            yield take(pauseChannel);
+        }
+
         if (action.payload.result !== undefined) {
             webSocket.sendMessage('/app/jass/action', JSON.stringify({
-                actionType: action.payload.action,
+                actionType: action.payload.request.action,
                 payload: JSON.parse(action.payload.result)
             }));
         }
